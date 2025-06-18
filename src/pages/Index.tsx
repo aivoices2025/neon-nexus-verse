@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginForm } from "@/components/LoginForm";
@@ -15,11 +14,13 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Video, Users, Headphones } from "lucide-react";
 
 const Index = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const [activeView, setActiveView] = useState<"dashboard" | "events" | "profile">("dashboard");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isVRMode, setIsVRMode] = useState(false);
+
+  console.log("Index component render - user:", user, "isLoading:", isLoading);
 
   // Enhanced mock event data with 360° video support
   const events = [
@@ -78,10 +79,26 @@ const Index = () => {
     event.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Show loading state while checking authentication
+  if (isLoading) {
+    console.log("Index: Showing loading state");
+    return (
+      <div className="min-h-screen bg-background cyber-grid flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading VR Experience...</p>
+        </div>
+      </div>
+    );
+  }
+
   // If not authenticated, show login form
   if (!user) {
+    console.log("Index: User not authenticated, showing login form");
     return <LoginForm />;
   }
+
+  console.log("Index: User authenticated, showing main app for user:", user.username);
 
   const handleJoinEvent = (event: any) => {
     setSelectedEvent(event);

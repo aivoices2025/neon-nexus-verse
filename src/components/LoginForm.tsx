@@ -18,16 +18,24 @@ export const LoginForm = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("LoginForm: handleLogin called with email:", email);
     setError("");
     
-    const success = await login(email, password);
-    if (!success) {
-      setError("Invalid credentials. Try any email/password combination.");
+    try {
+      const success = await login(email, password);
+      console.log("LoginForm: Login result:", success);
+      if (!success) {
+        setError("Invalid credentials. Try any email/password combination.");
+      }
+    } catch (error) {
+      console.error("LoginForm: Login error:", error);
+      setError("Login failed. Please try again.");
     }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("LoginForm: handleSignup called with username:", username, "email:", email);
     setError("");
     
     if (!username || !email || !password) {
@@ -35,8 +43,14 @@ export const LoginForm = () => {
       return;
     }
     
-    const success = await signup(username, email, password);
-    if (!success) {
+    try {
+      const success = await signup(username, email, password);
+      console.log("LoginForm: Signup result:", success);
+      if (!success) {
+        setError("Signup failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("LoginForm: Signup error:", error);
       setError("Signup failed. Please try again.");
     }
   };
