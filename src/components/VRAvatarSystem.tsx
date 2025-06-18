@@ -2,7 +2,7 @@
 import { useRef, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Text, Sphere, Box } from "@react-three/drei";
-import { Mesh, SpotLight } from "three";
+import { Mesh, SpotLight, Object3D } from "three";
 
 interface Avatar {
   id: string;
@@ -18,7 +18,7 @@ interface VRAvatarProps {
 
 const VRAvatar = ({ avatar }: VRAvatarProps) => {
   const meshRef = useRef<Mesh>(null);
-  const textRef = useRef<Mesh>(null);
+  const textRef = useRef<Object3D>(null);
 
   useFrame((state) => {
     if (meshRef.current) {
