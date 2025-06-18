@@ -10,6 +10,9 @@ import { EventCard } from "@/components/EventCard";
 import { VRPreview } from "@/components/VRPreview";
 import { UserProfile } from "@/components/UserProfile";
 import { ChatPanel } from "@/components/ChatPanel";
+import { ThreeScene } from "@/components/ThreeScene";
+import { DashboardStats } from "@/components/DashboardStats";
+import { PrototypeFeatures } from "@/components/PrototypeFeatures";
 
 const Index = () => {
   const [activeView, setActiveView] = useState<"dashboard" | "profile" | "event">("dashboard");
@@ -141,6 +144,15 @@ const Index = () => {
                 Experience concerts, talks, and meetups in immersive virtual spaces. 
                 Join from VR or any device.
               </p>
+              
+              {/* 3D Preview */}
+              <div className="max-w-4xl mx-auto mb-8">
+                <ThreeScene />
+                <p className="text-sm text-muted-foreground mt-2">
+                  Interactive 3D preview - Click and drag to explore
+                </p>
+              </div>
+              
               <div className="flex justify-center space-x-4">
                 <Button size="lg" className="neon-glow bg-primary hover:bg-primary/90">
                   <Video className="w-5 h-5 mr-2" />
@@ -152,6 +164,9 @@ const Index = () => {
                 </Button>
               </div>
             </section>
+
+            {/* Dashboard Stats */}
+            <DashboardStats />
 
             {/* Live Events */}
             <section>
@@ -174,12 +189,15 @@ const Index = () => {
             {/* Upcoming Events */}
             <section>
               <h3 className="text-2xl font-bold mb-6">Upcoming Events</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {filteredEvents.filter(event => !event.isLive).map((event) => (
                   <EventCard key={event.id} event={event} onJoin={setSelectedEvent} />
                 ))}
               </div>
             </section>
+
+            {/* Feature Prototypes */}
+            <PrototypeFeatures />
 
             {/* Categories */}
             <section>
