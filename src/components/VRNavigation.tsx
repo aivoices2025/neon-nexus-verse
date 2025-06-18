@@ -5,8 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Home, Video, User, LogOut, Headphones } from "lucide-react";
 
 interface VRNavigationProps {
-  currentView: string;
-  onViewChange: (view: string) => void;
+  currentView: "dashboard" | "events" | "profile";
+  onViewChange: (view: "dashboard" | "events" | "profile") => void;
   isVRMode: boolean;
   onToggleVR: () => void;
   user: any;
