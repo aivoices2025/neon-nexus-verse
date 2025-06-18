@@ -154,20 +154,12 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
           Virtual Event Space
         </Text>
         
-        {/* Lighting */}
+        {/* Simplified Lighting - removed problematic spotlight */}
         <ambientLight intensity={0.4} />
         <pointLight position={[0, 8, 0]} intensity={1.2} color="#7c3aed" />
         <pointLight position={[-5, 4, 5]} intensity={0.8} color="#00ffff" />
         <pointLight position={[5, 4, 5]} intensity={0.8} color="#ff00ff" />
-        {/* Simple spotlight without problematic target manipulation */}
-        <spotLight 
-          position={[0, 10, -8]} 
-          intensity={1.5}
-          color="#ffffff"
-          angle={Math.PI / 6}
-          penumbra={0.5}
-          castShadow
-        />
+        <directionalLight position={[0, 10, -8]} intensity={1.5} color="#ffffff" castShadow />
       </>
     );
   };
