@@ -2,7 +2,7 @@
 import { useRef, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Text, Sphere, Box } from "@react-three/drei";
-import { Mesh } from "three";
+import { Mesh, SpotLight } from "three";
 
 interface Avatar {
   id: string;
@@ -73,6 +73,26 @@ const VRAvatar = ({ avatar }: VRAvatarProps) => {
         </Sphere>
       )}
     </group>
+  );
+};
+
+const StageSpotlight = () => {
+  const spotLightRef = useRef<SpotLight>(null);
+
+  useEffect(() => {
+    if (spotLightRef.current && spotLightRef.current.target) {
+      spotLightRef.current.target.position.set(0, 2, -8);
+    }
+  }, []);
+
+  return (
+    <spotLight 
+      ref={spotLightRef}
+      position={[0, 10, -8]} 
+      intensity={2}
+      color="#ffffff"
+      angle={Math.PI / 6}
+    />
   );
 };
 
@@ -159,13 +179,7 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
         <pointLight position={[0, 8, 0]} intensity={1.2} color="#7c3aed" />
         <pointLight position={[-5, 4, 5]} intensity={0.8} color="#00ffff" />
         <pointLight position={[5, 4, 5]} intensity={0.8} color="#ff00ff" />
-        <spotLight 
-          position={[0, 10, -8]} 
-          target-position={[0, 2, -8]}
-          intensity={2}
-          color="#ffffff"
-          angle={Math.PI / 6}
-        />
+        <StageSpotlight />
       </>
     );
   };
