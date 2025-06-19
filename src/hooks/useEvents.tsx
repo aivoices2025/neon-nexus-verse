@@ -28,7 +28,7 @@ export const useEvents = () => {
     try {
       console.log("Fetching VR events...");
       const { data, error } = await supabase
-        .from('vr_events')
+        .from('vr_events' as any)
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -57,7 +57,7 @@ export const useEvents = () => {
     try {
       console.log("Creating new event:", eventData.title);
       const { data, error } = await supabase
-        .from('vr_events')
+        .from('vr_events' as any)
         .insert([{
           ...eventData,
           created_by: user.id,
@@ -71,7 +71,7 @@ export const useEvents = () => {
         throw new Error(error.message);
       }
 
-      console.log("Event created successfully:", data.title);
+      console.log("Event created successfully:", data?.title);
       await fetchEvents(); // Refresh the events list
       return data;
     } catch (err) {
@@ -87,12 +87,23 @@ export const useEvents = () => {
 
     try {
       console.log("Joining event:", eventId);
-      // In a real app, you would track event attendance
-      // For now, we'll just increment the attendees count
+      // Get current event data first
+      const { data: currentEvent, error: fetchError } = await supabase
+        .from('vr_events' as any)
+        .select('attendees')
+        .eq('id', eventId)
+        .single();
+
+      if (fetchError) {
+        console.error("Error fetching current event:", fetchError);
+        throw new Error(fetchError.message);
+      }
+
+      // Update with incremented attendees count
       const { error } = await supabase
-        .from('vr_events')
+        .from('vr_events' as any)
         .update({ 
-          attendees: supabase.sql`attendees + 1`
+          attendees: (currentEvent?.attendees || 0) + 1
         })
         .eq('id', eventId);
 

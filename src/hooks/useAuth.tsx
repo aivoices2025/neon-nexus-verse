@@ -35,16 +35,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         
         if (session?.user) {
-          // Fetch user profile data
+          // Fetch user profile data using raw query to avoid type issues
           const { data: profile } = await supabase
-            .from('profiles')
+            .from('profiles' as any)
             .select('username, avatar_url')
             .eq('id', session.user.id)
             .single();
           
           const authUser: AuthUser = {
             ...session.user,
-            username: profile?.username || session.user.email?.split('@')[0],
+            username: profile?.username || session.user.email?.split('@')[0] || 'User',
             avatar: profile?.avatar_url || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face`,
             joinedEvents: []
           };
