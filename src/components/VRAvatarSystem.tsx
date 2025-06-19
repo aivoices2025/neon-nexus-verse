@@ -168,7 +168,6 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
           position: isVRMode ? [0, 1.6, 3] : [0, 3, 8], 
           fov: 60 
         }}
-        gl={{ antialias: true, alpha: false }}
       >
         <VRSpace />
         <OrbitControls 
