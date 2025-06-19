@@ -21,10 +21,15 @@ const VRAvatar = ({ avatar }: VRAvatarProps) => {
   const bodyRef = useRef<Mesh>(null);
 
   useFrame((state) => {
-    if (bodyRef.current) {
-      // Gentle floating animation
-      const floatY = Math.sin(state.clock.elapsedTime * 2) * 0.1;
-      bodyRef.current.position.y = floatY;
+    // Add null check and ensure the ref is properly attached
+    if (bodyRef.current && bodyRef.current.position) {
+      try {
+        // Gentle floating animation
+        const floatY = Math.sin(state.clock.elapsedTime * 2) * 0.1;
+        bodyRef.current.position.y = floatY;
+      } catch (error) {
+        console.log("Animation error:", error);
+      }
     }
   });
 
@@ -44,7 +49,7 @@ const VRAvatar = ({ avatar }: VRAvatarProps) => {
         <meshStandardMaterial color={avatar.color} />
       </Sphere>
       
-      {/* Name Tag - Simplified */}
+      {/* Name Tag */}
       <Text
         position={[0, 0.8, 0]}
         fontSize={0.2}
@@ -140,7 +145,7 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
           return <VRAvatar key={avatar.id} avatar={avatar} />;
         })}
         
-        {/* Event Title - Simplified */}
+        {/* Event Title */}
         <Text
           position={[0, 4, -8]}
           fontSize={1}
@@ -151,7 +156,7 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
           Virtual Event Space
         </Text>
         
-        {/* Simplified Lighting */}
+        {/* Lighting */}
         <ambientLight intensity={0.4} />
         <pointLight position={[0, 8, 0]} intensity={1.2} color="#7c3aed" />
         <pointLight position={[-5, 4, 5]} intensity={0.8} color="#00ffff" />
@@ -167,6 +172,12 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
         camera={{ 
           position: isVRMode ? [0, 1.6, 3] : [0, 3, 8], 
           fov: 60 
+        }}
+        onCreated={({ gl }) => {
+          console.log("Canvas created successfully");
+        }}
+        onError={(error) => {
+          console.error("Canvas error:", error);
         }}
       >
         <VRSpace />
