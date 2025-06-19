@@ -83,6 +83,8 @@ interface VRAvatarSystemProps {
 }
 
 export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSystemProps) => {
+  console.log("VRAvatarSystem: Rendering with currentUser:", currentUser, "eventId:", eventId, "isVRMode:", isVRMode);
+  
   // Mock avatar data - in real app this would come from backend
   const avatars: Avatar[] = [
     {
@@ -94,7 +96,7 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
     },
     {
       id: "user2",
-      name: "CyberExplorer",
+      name: "CyberExplorer", 
       position: [-2, 1, -1],
       color: "#00ffff"
     },
@@ -113,82 +115,100 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
   ];
 
   const VRSpace = () => {
-    return (
-      <>
-        {/* Virtual Floor */}
-        <Box position={[0, -0.5, 0]} args={[20, 0.1, 20]}>
-          <meshStandardMaterial color="#1a1a2e" />
-        </Box>
-        
-        {/* Virtual Stage/Screen */}
-        <Box position={[0, 2, -8]} args={[12, 6, 0.2]}>
-          <meshStandardMaterial color="#2a2a2a" emissive="#7c3aed" emissiveIntensity={0.1} />
-        </Box>
-        
-        {/* Ambient Particles */}
-        {Array.from({ length: 20 }).map((_, i) => (
-          <Sphere key={i} args={[0.02]} position={[
-            (Math.random() - 0.5) * 30,
-            Math.random() * 10 + 1,
-            (Math.random() - 0.5) * 30
-          ]}>
-            <meshBasicMaterial color="#ffffff" opacity={0.6} transparent />
-          </Sphere>
-        ))}
-        
-        {/* Render Avatars */}
-        {avatars.map((avatar) => (
-          <VRAvatar key={avatar.id} avatar={avatar} />
-        ))}
-        
-        {/* Event Title */}
-        <Text
-          position={[0, 4, -8]}
-          fontSize={1}
-          color="#ffffff"
-          anchorX="center"
-          anchorY="middle"
-          outlineWidth={0.02}
-          outlineColor="#7c3aed"
-        >
-          Virtual Event Space
-        </Text>
-        
-        {/* Simplified Lighting - removed problematic spotlight */}
-        <ambientLight intensity={0.4} />
-        <pointLight position={[0, 8, 0]} intensity={1.2} color="#7c3aed" />
-        <pointLight position={[-5, 4, 5]} intensity={0.8} color="#00ffff" />
-        <pointLight position={[5, 4, 5]} intensity={0.8} color="#ff00ff" />
-        <directionalLight position={[0, 10, -8]} intensity={1.5} color="#ffffff" castShadow />
-      </>
-    );
+    console.log("VRAvatarSystem: Rendering VRSpace component");
+    
+    try {
+      return (
+        <>
+          {/* Virtual Floor */}
+          <Box position={[0, -0.5, 0]} args={[20, 0.1, 20]}>
+            <meshStandardMaterial color="#1a1a2e" />
+          </Box>
+          
+          {/* Virtual Stage/Screen */}
+          <Box position={[0, 2, -8]} args={[12, 6, 0.2]}>
+            <meshStandardMaterial color="#2a2a2a" emissive="#7c3aed" emissiveIntensity={0.1} />
+          </Box>
+          
+          {/* Ambient Particles */}
+          {Array.from({ length: 20 }).map((_, i) => (
+            <Sphere key={i} args={[0.02]} position={[
+              (Math.random() - 0.5) * 30,
+              Math.random() * 10 + 1,
+              (Math.random() - 0.5) * 30
+            ]}>
+              <meshBasicMaterial color="#ffffff" opacity={0.6} transparent />
+            </Sphere>
+          ))}
+          
+          {/* Render Avatars */}
+          {avatars.map((avatar) => {
+            console.log("VRAvatarSystem: Rendering avatar:", avatar.name);
+            return <VRAvatar key={avatar.id} avatar={avatar} />;
+          })}
+          
+          {/* Event Title */}
+          <Text
+            position={[0, 4, -8]}
+            fontSize={1}
+            color="#ffffff"
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.02}
+            outlineColor="#7c3aed"
+          >
+            Virtual Event Space
+          </Text>
+          
+          {/* Simplified Lighting - removed problematic spotlight */}
+          <ambientLight intensity={0.4} />
+          <pointLight position={[0, 8, 0]} intensity={1.2} color="#7c3aed" />
+          <pointLight position={[-5, 4, 5]} intensity={0.8} color="#00ffff" />
+          <pointLight position={[5, 4, 5]} intensity={0.8} color="#ff00ff" />
+          <directionalLight position={[0, 10, -8]} intensity={1.5} color="#ffffff" castShadow />
+        </>
+      );
+    } catch (error) {
+      console.error("VRAvatarSystem: Error in VRSpace:", error);
+      return null;
+    }
   };
 
-  return (
-    <div className={`${isVRMode ? 'w-full h-screen' : 'w-full h-96'} rounded-lg overflow-hidden border border-border/30`}>
-      <Canvas 
-        camera={{ 
-          position: isVRMode ? [0, 1.6, 3] : [0, 3, 8], 
-          fov: 60 
-        }}
-        gl={{ antialias: true, alpha: false }}
-      >
-        <VRSpace />
-        <OrbitControls 
-          enablePan={!isVRMode} 
-          maxDistance={isVRMode ? 5 : 15} 
-          minDistance={isVRMode ? 1 : 3}
-          target={[0, 1, 0]}
-        />
-      </Canvas>
-      
-      {!isVRMode && (
-        <div className="absolute bottom-4 left-4 bg-black/70 rounded-lg p-2 backdrop-blur-md">
-          <p className="text-white text-xs">
-            {avatars.length} users in this space • Click and drag to explore
-          </p>
-        </div>
-      )}
-    </div>
-  );
+  try {
+    return (
+      <div className={`${isVRMode ? 'w-full h-screen' : 'w-full h-96'} rounded-lg overflow-hidden border border-border/30`}>
+        <Canvas 
+          camera={{ 
+            position: isVRMode ? [0, 1.6, 3] : [0, 3, 8], 
+            fov: 60 
+          }}
+          gl={{ antialias: true, alpha: false }}
+          onError={(error) => console.error("VRAvatarSystem: Canvas error:", error)}
+        >
+          <VRSpace />
+          <OrbitControls 
+            enablePan={!isVRMode} 
+            maxDistance={isVRMode ? 5 : 15} 
+            minDistance={isVRMode ? 1 : 3}
+            target={[0, 1, 0]}
+          />
+        </Canvas>
+        
+        {!isVRMode && (
+          <div className="absolute bottom-4 left-4 bg-black/70 rounded-lg p-2 backdrop-blur-md">
+            <p className="text-white text-xs">
+              {avatars.length} users in this space • Click and drag to explore
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  } catch (error) {
+    console.error("VRAvatarSystem: Render error:", error);
+    return (
+      <div className={`${isVRMode ? 'w-full h-screen' : 'w-full h-96'} rounded-lg overflow-hidden border border-border/30 flex items-center justify-center`}>
+        <p className="text-muted-foreground">Unable to load 3D scene</p>
+      </div>
+    );
+  }
 };
