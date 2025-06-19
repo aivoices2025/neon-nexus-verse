@@ -13,6 +13,7 @@ export const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   
   const { login, signup, isLoading } = useAuth();
 
@@ -20,16 +21,11 @@ export const LoginForm = () => {
     e.preventDefault();
     console.log("LoginForm: handleLogin called with email:", email);
     setError("");
+    setSuccess("");
     
-    try {
-      const success = await login(email, password);
-      console.log("LoginForm: Login result:", success);
-      if (!success) {
-        setError("Invalid credentials. Try any email/password combination.");
-      }
-    } catch (error) {
-      console.error("LoginForm: Login error:", error);
-      setError("Login failed. Please try again.");
+    const result = await login(email, password);
+    if (!result.success) {
+      setError(result.error || "Login failed. Please try again.");
     }
   };
 
@@ -37,21 +33,18 @@ export const LoginForm = () => {
     e.preventDefault();
     console.log("LoginForm: handleSignup called with username:", username, "email:", email);
     setError("");
+    setSuccess("");
     
     if (!username || !email || !password) {
       setError("Please fill in all fields");
       return;
     }
     
-    try {
-      const success = await signup(username, email, password);
-      console.log("LoginForm: Signup result:", success);
-      if (!success) {
-        setError("Signup failed. Please try again.");
-      }
-    } catch (error) {
-      console.error("LoginForm: Signup error:", error);
-      setError("Signup failed. Please try again.");
+    const result = await signup(username, email, password);
+    if (result.success) {
+      setSuccess("Account created! Please check your email for verification.");
+    } else {
+      setError(result.error || "Signup failed. Please try again.");
     }
   };
 
@@ -114,6 +107,10 @@ export const LoginForm = () => {
                     <p className="text-red-400 text-sm">{error}</p>
                   )}
                   
+                  {success && (
+                    <p className="text-green-400 text-sm">{success}</p>
+                  )}
+                  
                   <Button 
                     type="submit" 
                     className="w-full neon-glow bg-primary hover:bg-primary/90"
@@ -167,6 +164,10 @@ export const LoginForm = () => {
                     <p className="text-red-400 text-sm">{error}</p>
                   )}
                   
+                  {success && (
+                    <p className="text-green-400 text-sm">{success}</p>
+                  )}
+                  
                   <Button 
                     type="submit" 
                     className="w-full neon-glow bg-primary hover:bg-primary/90"
@@ -177,13 +178,6 @@ export const LoginForm = () => {
                 </form>
               </TabsContent>
             </Tabs>
-            
-            {/* Demo Info */}
-            <div className="mt-6 p-4 bg-muted/20 rounded-lg border border-border/30">
-              <p className="text-xs text-muted-foreground text-center">
-                Demo Mode: Use any email/password to login
-              </p>
-            </div>
           </CardContent>
         </Card>
 

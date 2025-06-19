@@ -1,138 +1,145 @@
 
 import { useState, useEffect, createContext, useContext } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
 
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  avatar: string;
-  joinedEvents: string[];
+interface AuthUser extends User {
+  username?: string;
+  avatar?: string;
+  joinedEvents?: string[];
 }
 
 interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  signup: (username: string, email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  user: AuthUser | null;
+  session: Session | null;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (username: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log("AuthProvider: Checking for existing session...");
-    // Check for existing session
-    const savedUser = localStorage.getItem("vrapp_user");
-    if (savedUser) {
-      console.log("AuthProvider: Found saved user:", savedUser);
-      try {
-        const parsedUser = JSON.parse(savedUser);
-        setUser(parsedUser);
-        console.log("AuthProvider: Successfully loaded user:", parsedUser);
-      } catch (error) {
-        console.error("AuthProvider: Error parsing saved user:", error);
-        localStorage.removeItem("vrapp_user");
+    console.log("AuthProvider: Setting up Supabase auth listener...");
+    
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.email);
+        setSession(session);
+        
+        if (session?.user) {
+          // Fetch user profile data
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username, avatar_url')
+            .eq('id', session.user.id)
+            .single();
+          
+          const authUser: AuthUser = {
+            ...session.user,
+            username: profile?.username || session.user.email?.split('@')[0],
+            avatar: profile?.avatar_url || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face`,
+            joinedEvents: []
+          };
+          setUser(authUser);
+        } else {
+          setUser(null);
+        }
+        
+        setIsLoading(false);
       }
-    } else {
-      console.log("AuthProvider: No saved user found");
-    }
-    setIsLoading(false);
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session check:", session?.user?.email);
+      // The auth state change listener will handle the user setup
+    });
+
+    return () => {
+      console.log("Cleaning up auth subscription");
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string) => {
     console.log("Login attempt with email:", email);
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock authentication - in real app this would validate against backend
-      if (email && password) {
-        console.log("Login: Creating mock user...");
-        const mockUser: User = {
-          id: "user_" + Date.now(),
-          username: email.split("@")[0],
-          email,
-          avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face`,
-          joinedEvents: []
-        };
-        
-        console.log("Login: Setting user state:", mockUser);
-        setUser(mockUser);
-        
-        console.log("Login: Saving user to localStorage...");
-        localStorage.setItem("vrapp_user", JSON.stringify(mockUser));
-        
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error("Login error:", error.message);
         setIsLoading(false);
-        console.log("Login: Success!");
-        return true;
+        return { success: false, error: error.message };
       }
-      
-      console.log("Login: Failed - missing email or password");
-      setIsLoading(false);
-      return false;
+
+      console.log("Login successful:", data.user?.email);
+      return { success: true };
     } catch (error) {
-      console.error("Login: Error occurred:", error);
+      console.error("Login exception:", error);
       setIsLoading(false);
-      return false;
+      return { success: false, error: "An unexpected error occurred" };
     }
   };
 
-  const signup = async (username: string, email: string, password: string): Promise<boolean> => {
+  const signup = async (username: string, email: string, password: string) => {
     console.log("Signup attempt with username:", username, "email:", email);
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const redirectUrl = `${window.location.origin}/`;
       
-      if (username && email && password) {
-        console.log("Signup: Creating mock user...");
-        const mockUser: User = {
-          id: "user_" + Date.now(),
-          username,
-          email,
-          avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face`,
-          joinedEvents: []
-        };
-        
-        console.log("Signup: Setting user state:", mockUser);
-        setUser(mockUser);
-        
-        console.log("Signup: Saving user to localStorage...");
-        localStorage.setItem("vrapp_user", JSON.stringify(mockUser));
-        
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            username: username,
+          }
+        }
+      });
+
+      if (error) {
+        console.error("Signup error:", error.message);
         setIsLoading(false);
-        console.log("Signup: Success!");
-        return true;
+        return { success: false, error: error.message };
       }
-      
-      console.log("Signup: Failed - missing required fields");
+
+      console.log("Signup successful:", data.user?.email);
       setIsLoading(false);
-      return false;
+      return { success: true };
     } catch (error) {
-      console.error("Signup: Error occurred:", error);
+      console.error("Signup exception:", error);
       setIsLoading(false);
-      return false;
+      return { success: false, error: "An unexpected error occurred" };
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     console.log("Logout: Clearing user session...");
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("vrapp_user");
+    setSession(null);
     console.log("Logout: Complete");
   };
 
-  console.log("AuthProvider render - user:", user, "isLoading:", isLoading);
+  console.log("AuthProvider render - user:", user?.email, "isLoading:", isLoading);
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, session, login, signup, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
