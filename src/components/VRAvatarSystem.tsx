@@ -1,7 +1,7 @@
 
 import { useRef, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Text, Sphere, Box } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { Mesh, Group } from "three";
 
 interface Avatar {
@@ -35,38 +35,31 @@ const VRAvatar = ({ avatar }: VRAvatarProps) => {
   return (
     <group ref={groupRef} position={avatar.position}>
       {/* Avatar Body */}
-      <Sphere ref={bodyRef} args={[0.3]} position={[0, 0, 0]}>
+      <mesh ref={bodyRef} position={[0, 0, 0]}>
+        <sphereGeometry args={[0.3]} />
         <meshStandardMaterial 
           color={avatar.color} 
           emissive={avatar.isCurrentUser ? avatar.color : "#000000"}
           emissiveIntensity={avatar.isCurrentUser ? 0.2 : 0}
         />
-      </Sphere>
+      </mesh>
       
       {/* Avatar Head */}
-      <Sphere args={[0.15]} position={[0, 0.5, 0]}>
+      <mesh position={[0, 0.5, 0]}>
+        <sphereGeometry args={[0.15]} />
         <meshStandardMaterial color={avatar.color} />
-      </Sphere>
-      
-      {/* Name Tag - Using basic Text props only */}
-      <Text
-        position={[0, 0.8, 0]}
-        fontSize={0.2}
-        color="white"
-      >
-        {avatar.name}
-        {avatar.isCurrentUser && " (You)"}
-      </Text>
+      </mesh>
       
       {/* Glow effect for current user */}
       {avatar.isCurrentUser && (
-        <Sphere args={[0.35]} position={[0, 0, 0]}>
+        <mesh position={[0, 0, 0]}>
+          <sphereGeometry args={[0.35]} />
           <meshBasicMaterial 
             color={avatar.color} 
             transparent 
             opacity={0.2}
           />
-        </Sphere>
+        </mesh>
       )}
     </group>
   );
@@ -116,24 +109,27 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
     return (
       <>
         {/* Virtual Floor */}
-        <Box position={[0, -0.5, 0]} args={[20, 0.1, 20]}>
+        <mesh position={[0, -0.5, 0]}>
+          <boxGeometry args={[20, 0.1, 20]} />
           <meshStandardMaterial color="#1a1a2e" />
-        </Box>
+        </mesh>
         
         {/* Virtual Stage/Screen */}
-        <Box position={[0, 2, -8]} args={[12, 6, 0.2]}>
+        <mesh position={[0, 2, -8]}>
+          <boxGeometry args={[12, 6, 0.2]} />
           <meshStandardMaterial color="#2a2a2a" emissive="#7c3aed" emissiveIntensity={0.1} />
-        </Box>
+        </mesh>
         
         {/* Ambient Particles */}
         {Array.from({ length: 20 }).map((_, i) => (
-          <Sphere key={i} args={[0.02]} position={[
+          <mesh key={i} position={[
             (Math.random() - 0.5) * 30,
             Math.random() * 10 + 1,
             (Math.random() - 0.5) * 30
           ]}>
+            <sphereGeometry args={[0.02]} />
             <meshBasicMaterial color="#ffffff" opacity={0.6} transparent />
-          </Sphere>
+          </mesh>
         ))}
         
         {/* Render Avatars */}
@@ -141,15 +137,6 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
           console.log("VRAvatarSystem: Rendering avatar:", avatar.name);
           return <VRAvatar key={avatar.id} avatar={avatar} />;
         })}
-        
-        {/* Event Title - Simplified Text props */}
-        <Text
-          position={[0, 4, -8]}
-          fontSize={1}
-          color="white"
-        >
-          Virtual Event Space
-        </Text>
         
         {/* Lighting */}
         <ambientLight intensity={0.4} />
