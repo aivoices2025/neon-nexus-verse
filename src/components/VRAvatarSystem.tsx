@@ -21,8 +21,7 @@ const VRAvatar = ({ avatar }: VRAvatarProps) => {
   const bodyRef = useRef<Mesh>(null);
 
   useFrame((state) => {
-    // Add null check and ensure the ref is properly attached
-    if (bodyRef.current && bodyRef.current.position) {
+    if (bodyRef.current) {
       try {
         // Gentle floating animation
         const floatY = Math.sin(state.clock.elapsedTime * 2) * 0.1;
@@ -49,13 +48,11 @@ const VRAvatar = ({ avatar }: VRAvatarProps) => {
         <meshStandardMaterial color={avatar.color} />
       </Sphere>
       
-      {/* Name Tag */}
+      {/* Name Tag - Using basic Text props only */}
       <Text
         position={[0, 0.8, 0]}
         fontSize={0.2}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
+        color="white"
       >
         {avatar.name}
         {avatar.isCurrentUser && " (You)"}
@@ -145,13 +142,11 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
           return <VRAvatar key={avatar.id} avatar={avatar} />;
         })}
         
-        {/* Event Title */}
+        {/* Event Title - Simplified Text props */}
         <Text
           position={[0, 4, -8]}
           fontSize={1}
-          color="#ffffff"
-          anchorX="center"
-          anchorY="middle"
+          color="white"
         >
           Virtual Event Space
         </Text>
@@ -173,7 +168,7 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
           position: isVRMode ? [0, 1.6, 3] : [0, 3, 8], 
           fov: 60 
         }}
-        onCreated={({ gl }) => {
+        onCreated={() => {
           console.log("Canvas created successfully");
         }}
         onError={(error) => {
