@@ -28,7 +28,7 @@ export const useEvents = () => {
     try {
       console.log("Fetching VR events...");
       const { data, error } = await supabase
-        .from('vr_events' as any)
+        .from('vr_events')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -57,7 +57,7 @@ export const useEvents = () => {
     try {
       console.log("Creating new event:", eventData.title);
       const { data, error } = await supabase
-        .from('vr_events' as any)
+        .from('vr_events')
         .insert([{
           ...eventData,
           created_by: user.id,
@@ -89,7 +89,7 @@ export const useEvents = () => {
       console.log("Joining event:", eventId);
       // Get current event data first
       const { data: currentEvent, error: fetchError } = await supabase
-        .from('vr_events' as any)
+        .from('vr_events')
         .select('attendees')
         .eq('id', eventId)
         .single();
@@ -101,7 +101,7 @@ export const useEvents = () => {
 
       // Update with incremented attendees count
       const { error } = await supabase
-        .from('vr_events' as any)
+        .from('vr_events')
         .update({ 
           attendees: (currentEvent?.attendees || 0) + 1
         })

@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useEvents } from "@/hooks/useEvents";
 import { LoginForm } from "@/components/LoginForm";
 import { VRNavigation } from "@/components/VRNavigation";
 import { Video360Viewer } from "@/components/Video360Viewer";
@@ -8,6 +9,7 @@ import { VRAvatarSystem } from "@/components/VRAvatarSystem";
 import { EventCard } from "@/components/EventCard";
 import { DashboardStats } from "@/components/DashboardStats";
 import { ChatPanel } from "@/components/ChatPanel";
+import { AddEventForm } from "@/components/AddEventForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,64 +18,13 @@ import { Search, Video, Users, Headphones } from "lucide-react";
 
 const Index = () => {
   const { user, logout, isLoading } = useAuth();
+  const { events, isLoading: eventsLoading, refreshEvents } = useEvents();
   const [activeView, setActiveView] = useState<"dashboard" | "events" | "profile">("dashboard");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isVRMode, setIsVRMode] = useState(false);
 
   console.log("Index component render - user:", user, "isLoading:", isLoading, "activeView:", activeView);
-
-  // Enhanced mock event data with 360° video support
-  const events = [
-    {
-      id: 1,
-      title: "Virtual Concert: Neon Beats 360°",
-      description: "Immersive electronic music experience in 360° video with spatial audio",
-      category: "Music",
-      attendees: 1247,
-      date: "Tonight 8PM PST",
-      image: "https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?w=800&h=600&fit=crop",
-      isLive: true,
-      vrEnabled: true,
-      has360Video: true
-    },
-    {
-      id: 2,
-      title: "AI Tech Talk: VR Future",
-      description: "Leading experts discuss AI and VR convergence in virtual space",
-      category: "Tech",
-      attendees: 856,
-      date: "Tomorrow 2PM PST",
-      image: "https://images.unsplash.com/photo-1500673922987-e212871fec22?w=800&h=600&fit=crop",
-      isLive: false,
-      vrEnabled: true,
-      has360Video: false
-    },
-    {
-      id: 3,
-      title: "360° Digital Art Gallery",
-      description: "Explore stunning 3D artworks in immersive 360° virtual gallery",
-      category: "Art",
-      attendees: 432,
-      date: "Friday 6PM PST",
-      image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&h=600&fit=crop",
-      isLive: false,
-      vrEnabled: true,
-      has360Video: true
-    },
-    {
-      id: 4,
-      title: "VR Startup Pitch Night",
-      description: "Watch innovative VR startups present in virtual auditorium",
-      category: "Business",
-      attendees: 623,
-      date: "Saturday 4PM PST",
-      image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=800&h=600&fit=crop",
-      isLive: false,
-      vrEnabled: true,
-      has360Video: false
-    }
-  ];
 
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -204,6 +155,11 @@ const Index = () => {
             console.log("Index: Rendering events view");
             return (
               <div className="space-y-8">
+                {/* Add Event Form */}
+                <div className="flex justify-center">
+                  <AddEventForm onEventCreated={refreshEvents} />
+                </div>
+
                 {/* Search Bar */}
                 <div className="flex items-center space-x-4 max-w-2xl mx-auto">
                   <div className="relative flex-1">
@@ -220,33 +176,42 @@ const Index = () => {
                   </Badge>
                 </div>
 
-                {/* Live Events */}
-                <section>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-2xl font-bold flex items-center">
-                      <span className="w-3 h-3 bg-red-500 rounded-full mr-3 animate-pulse"></span>
-                      Live VR Events
-                    </h3>
-                    <Badge variant="outline" className="border-red-500/50 text-red-400">
-                      {events.filter(e => e.isLive).length} Live Now
-                    </Badge>
+                {eventsLoading ? (
+                  <div className="text-center py-8">
+                    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading events...</p>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredEvents.filter(event => event.isLive).map((event) => (
-                      <EventCard key={event.id} event={event} onJoin={handleJoinEvent} />
-                    ))}
-                  </div>
-                </section>
+                ) : (
+                  <>
+                    {/* Live Events */}
+                    <section>
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-2xl font-bold flex items-center">
+                          <span className="w-3 h-3 bg-red-500 rounded-full mr-3 animate-pulse"></span>
+                          Live VR Events
+                        </h3>
+                        <Badge variant="outline" className="border-red-500/50 text-red-400">
+                          {filteredEvents.filter(e => e.is_live).length} Live Now
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredEvents.filter(event => event.is_live).map((event) => (
+                          <EventCard key={event.id} event={event} onJoin={handleJoinEvent} />
+                        ))}
+                      </div>
+                    </section>
 
-                {/* Upcoming Events */}
-                <section>
-                  <h3 className="text-2xl font-bold mb-6">Upcoming VR Events</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {filteredEvents.filter(event => !event.isLive).map((event) => (
-                      <EventCard key={event.id} event={event} onJoin={handleJoinEvent} />
-                    ))}
-                  </div>
-                </section>
+                    {/* Upcoming Events */}
+                    <section>
+                      <h3 className="text-2xl font-bold mb-6">Upcoming VR Events</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {filteredEvents.filter(event => !event.is_live).map((event) => (
+                          <EventCard key={event.id} event={event} onJoin={handleJoinEvent} />
+                        ))}
+                      </div>
+                    </section>
+                  </>
+                )}
               </div>
             );
           })()}
@@ -270,8 +235,8 @@ const Index = () => {
                     
                     <div className="grid grid-cols-3 gap-4 text-center">
                       <div className="p-4 bg-primary/10 rounded-lg">
-                        <div className="text-2xl font-bold text-primary">12</div>
-                        <div className="text-sm text-muted-foreground">VR Events Joined</div>
+                        <div className="text-2xl font-bold text-primary">{events.filter(e => e.created_by === user.id).length}</div>
+                        <div className="text-sm text-muted-foreground">Events Created</div>
                       </div>
                       <div className="p-4 bg-cyan-500/10 rounded-lg">
                         <div className="text-2xl font-bold text-cyan-400">48h</div>

@@ -35,9 +35,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         
         if (session?.user) {
-          // Fetch user profile data using raw query to avoid type issues
+          // Fetch user profile data from the profiles table
           const { data: profile } = await supabase
-            .from('profiles' as any)
+            .from('profiles')
             .select('username, avatar_url')
             .eq('id', session.user.id)
             .single();
