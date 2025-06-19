@@ -21,7 +21,7 @@ const VRAvatar = ({ avatar }: VRAvatarProps) => {
   const bodyRef = useRef<Mesh>(null);
 
   useFrame((state) => {
-    if (groupRef.current && bodyRef.current) {
+    if (bodyRef.current) {
       // Gentle floating animation
       const floatY = Math.sin(state.clock.elapsedTime * 2) * 0.1;
       bodyRef.current.position.y = floatY;
@@ -44,15 +44,13 @@ const VRAvatar = ({ avatar }: VRAvatarProps) => {
         <meshStandardMaterial color={avatar.color} />
       </Sphere>
       
-      {/* Name Tag */}
+      {/* Name Tag - Simplified */}
       <Text
         position={[0, 0.8, 0]}
         fontSize={0.2}
         color="#ffffff"
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.01}
-        outlineColor="#000000"
       >
         {avatar.name}
         {avatar.isCurrentUser && " (You)"}
@@ -142,15 +140,13 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
           return <VRAvatar key={avatar.id} avatar={avatar} />;
         })}
         
-        {/* Event Title */}
+        {/* Event Title - Simplified */}
         <Text
           position={[0, 4, -8]}
           fontSize={1}
           color="#ffffff"
           anchorX="center"
           anchorY="middle"
-          outlineWidth={0.02}
-          outlineColor="#7c3aed"
         >
           Virtual Event Space
         </Text>
