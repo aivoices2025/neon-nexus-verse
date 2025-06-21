@@ -47,6 +47,7 @@ export type Database = {
           is_live: boolean
           title: string
           updated_at: string
+          video_url: string | null
           vr_enabled: boolean
         }
         Insert: {
@@ -62,6 +63,7 @@ export type Database = {
           is_live?: boolean
           title: string
           updated_at?: string
+          video_url?: string | null
           vr_enabled?: boolean
         }
         Update: {
@@ -77,6 +79,7 @@ export type Database = {
           is_live?: boolean
           title?: string
           updated_at?: string
+          video_url?: string | null
           vr_enabled?: boolean
         }
         Relationships: []

@@ -14,6 +14,7 @@ export interface VREvent {
   is_live: boolean;
   vr_enabled: boolean;
   has_360_video: boolean;
+  video_url?: string; // New field for 360° video URL
   created_by: string;
   created_at: string;
 }
