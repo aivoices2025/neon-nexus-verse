@@ -38,7 +38,7 @@ export type Database = {
           attendees: number
           category: string
           created_at: string
-          created_by: string
+          created_by: string | null
           description: string
           event_date: string
           has_360_video: boolean
@@ -54,7 +54,7 @@ export type Database = {
           attendees?: number
           category: string
           created_at?: string
-          created_by: string
+          created_by?: string | null
           description: string
           event_date: string
           has_360_video?: boolean
@@ -70,7 +70,7 @@ export type Database = {
           attendees?: number
           category?: string
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           description?: string
           event_date?: string
           has_360_video?: boolean
