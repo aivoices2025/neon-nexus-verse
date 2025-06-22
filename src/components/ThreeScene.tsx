@@ -1,8 +1,8 @@
 
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Text, Box, Sphere, Plane } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { useRef, useState } from "react";
-import { Mesh } from "three";
+import { Mesh, BoxGeometry, MeshStandardMaterial, SphereGeometry, PlaneGeometry, MeshBasicMaterial } from "three";
 
 const InteractiveRoom = () => {
   const meshRef = useRef<Mesh>(null);
@@ -11,46 +11,41 @@ const InteractiveRoom = () => {
   return (
     <>
       {/* Room floor */}
-      <Plane 
-        rotation={[-Math.PI / 2, 0, 0]} 
-        position={[0, -2, 0]} 
-        args={[20, 20]}
-      >
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]}>
+        <planeGeometry args={[20, 20]} />
         <meshStandardMaterial color="#1a1a2e" />
-      </Plane>
+      </mesh>
 
       {/* Virtual stage */}
-      <Box 
+      <mesh 
         ref={meshRef}
         position={[0, -1, -5]} 
-        args={[8, 0.5, 4]}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
       >
+        <boxGeometry args={[8, 0.5, 4]} />
         <meshStandardMaterial color={hovered ? "#7c3aed" : "#4c1d95"} />
-      </Box>
+      </mesh>
 
       {/* Floating orbs representing users */}
-      <Sphere position={[-3, 1, 0]} args={[0.3]}>
+      <mesh position={[-3, 1, 0]}>
+        <sphereGeometry args={[0.3]} />
         <meshBasicMaterial color="#00ffff" />
-      </Sphere>
-      <Sphere position={[3, 1, 0]} args={[0.3]}>
+      </mesh>
+      <mesh position={[3, 1, 0]}>
+        <sphereGeometry args={[0.3]} />
         <meshBasicMaterial color="#ff00ff" />
-      </Sphere>
-      <Sphere position={[0, 1, 2]} args={[0.3]}>
+      </mesh>
+      <mesh position={[0, 1, 2]}>
+        <sphereGeometry args={[0.3]} />
         <meshBasicMaterial color="#ffff00" />
-      </Sphere>
+      </mesh>
 
-      {/* Event title */}
-      <Text
-        position={[0, 2, -5]}
-        fontSize={1}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-      >
-        Virtual Event Space
-      </Text>
+      {/* Event title - using HTML overlay instead of Text component to avoid font dependencies */}
+      <mesh position={[0, 2, -5]}>
+        <boxGeometry args={[0.1, 0.1, 0.1]} />
+        <meshBasicMaterial color="transparent" opacity={0} transparent />
+      </mesh>
 
       {/* Lighting */}
       <ambientLight intensity={0.3} />
@@ -63,11 +58,16 @@ const InteractiveRoom = () => {
 
 export const ThreeScene = () => {
   return (
-    <div className="w-full h-64 rounded-lg overflow-hidden border border-border/30">
+    <div className="w-full h-64 rounded-lg overflow-hidden border border-border/30 relative">
       <Canvas camera={{ position: [0, 2, 8], fov: 60 }}>
         <InteractiveRoom />
         <OrbitControls enablePan={false} maxDistance={15} minDistance={3} />
       </Canvas>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+        <h3 className="text-xl font-bold text-white text-center bg-black/50 px-4 py-2 rounded">
+          Virtual Event Space
+        </h3>
+      </div>
     </div>
   );
 };

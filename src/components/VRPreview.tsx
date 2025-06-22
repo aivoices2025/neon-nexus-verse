@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Video, Users, Mic, MicOff, Camera, CameraOff } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Text, Box, Sphere } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 
 interface VRPreviewProps {
   event: any;
@@ -16,31 +16,24 @@ const VirtualStage = () => {
   return (
     <>
       {/* Stage */}
-      <Box position={[0, -2, 0]} args={[10, 0.5, 6]} receiveShadow>
+      <mesh position={[0, -2, 0]} receiveShadow>
+        <boxGeometry args={[10, 0.5, 6]} />
         <meshStandardMaterial color="#2a2a2a" />
-      </Box>
+      </mesh>
       
       {/* Neon lights */}
-      <Sphere position={[-3, 2, -2]} args={[0.2]} >
+      <mesh position={[-3, 2, -2]}>
+        <sphereGeometry args={[0.2]} />
         <meshBasicMaterial color="#ff00ff" />
-      </Sphere>
-      <Sphere position={[3, 2, -2]} args={[0.2]} >
+      </mesh>
+      <mesh position={[3, 2, -2]}>
+        <sphereGeometry args={[0.2]} />
         <meshBasicMaterial color="#00ffff" />
-      </Sphere>
-      <Sphere position={[0, 3, -2]} args={[0.2]} >
+      </mesh>
+      <mesh position={[0, 3, -2]}>
+        <sphereGeometry args={[0.2]} />
         <meshBasicMaterial color="#ff00ff" />
-      </Sphere>
-      
-      {/* Text */}
-      <Text
-        position={[0, 0, -2]}
-        fontSize={1}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-      >
-        Virtual Stage
-      </Text>
+      </mesh>
       
       {/* Ambient lighting */}
       <ambientLight intensity={0.5} />
@@ -120,6 +113,13 @@ export const VRPreview = ({ event, onClose }: VRPreviewProps) => {
               <div className="text-sm text-muted-foreground bg-black/50 rounded px-2 py-1">
                 Click and drag to explore
               </div>
+            </div>
+            
+            {/* Virtual Stage Text Overlay */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+              <h3 className="text-2xl font-bold text-white text-center bg-black/50 px-6 py-3 rounded">
+                Virtual Stage
+              </h3>
             </div>
           </div>
           
