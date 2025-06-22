@@ -1,9 +1,11 @@
 
-import { useEffect, useRef, useState } from "react";
+import React, { useRef, useState, Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Play, Pause, Volume2, VolumeX, X, Headphones, RotateCcw } from "lucide-react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 
 interface Video360ViewerProps {
   event: any;
@@ -11,111 +13,100 @@ interface Video360ViewerProps {
   isVRMode: boolean;
 }
 
-export const Video360Viewer = ({ event, onClose, isVRMode }: Video360ViewerProps) => {
-  const aframeContainerRef = useRef<HTMLDivElement>(null);
-  const [isAFrameLoaded, setIsAFrameLoaded] = useState(false);
-  const [isVRActive, setIsVRActive] = useState(false);
+const Video360Sphere = ({ videoUrl }: { videoUrl: string }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoTexture, setVideoTexture] = useState<THREE.VideoTexture | null>(null);
 
-  useEffect(() => {
-    // Load A-Frame script dynamically
-    if (!document.querySelector('script[src*="aframe"]')) {
-      const script = document.createElement('script');
-      script.src = 'https://aframe.io/releases/1.4.0/aframe.min.js';
-      script.async = true;
-      script.onload = () => {
-        console.log('A-Frame loaded successfully');
-        setIsAFrameLoaded(true);
-      };
-      document.head.appendChild(script);
-    } else {
-      setIsAFrameLoaded(true);
+  useFrame(() => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y += 0.001;
     }
+  });
 
+  // Create video element and texture
+  React.useEffect(() => {
+    const video = document.createElement('video');
+    video.src = videoUrl;
+    video.autoplay = true;
+    video.loop = true;
+    video.muted = true;
+    video.crossOrigin = 'anonymous';
+    video.playsInline = true;
+    
+    videoRef.current = video;
+    
+    const texture = new THREE.VideoTexture(video);
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.format = THREE.RGBFormat;
+    
+    setVideoTexture(texture);
+    
+    video.play().catch(console.error);
+    
     return () => {
-      // Clean up A-Frame scene when component unmounts
-      if (aframeContainerRef.current) {
-        aframeContainerRef.current.innerHTML = '';
-      }
+      video.pause();
+      texture.dispose();
     };
-  }, []);
+  }, [videoUrl]);
 
-  useEffect(() => {
-    if (isAFrameLoaded && aframeContainerRef.current && event.has_360_video && event.video_url) {
-      createAFrameScene();
-    }
-  }, [isAFrameLoaded, event]);
+  if (!videoTexture) {
+    return (
+      <mesh>
+        <sphereGeometry args={[5, 32, 16]} />
+        <meshBasicMaterial color="#1a1a2e" />
+      </mesh>
+    );
+  }
+
+  return (
+    <mesh ref={meshRef} scale={[-1, 1, 1]}>
+      <sphereGeometry args={[5, 32, 16]} />
+      <meshBasicMaterial map={videoTexture} side={THREE.BackSide} />
+    </mesh>
+  );
+};
+
+const Video360Controls = () => {
+  return (
+    <group>
+      <ambientLight intensity={0.5} />
+    </group>
+  );
+};
+
+export const Video360Viewer = ({ event, onClose, isVRMode }: Video360ViewerProps) => {
+  const [cameraRotation, setCameraRotation] = useState({ x: 0, y: 0 });
 
   const getVideoSource = (url: string) => {
-    // Handle YouTube URLs by converting to embed format
+    // Handle YouTube URLs by converting to a placeholder 360 video
     if (url.includes('youtube.com/watch?v=') || url.includes('youtu.be/')) {
-      const videoId = url.includes('youtube.com') 
-        ? url.split('v=')[1]?.split('&')[0]
-        : url.split('youtu.be/')[1]?.split('?')[0];
-      // For A-Frame, we need a direct video file, so we'll use a placeholder 360 video
-      return 'https://ucarecdn.com/fadab25d-0b3a-45f7-8ef5-85318393d0ee/';
+      // For demo purposes, use a placeholder 360 video URL
+      return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
     }
     return url;
   };
 
-  const createAFrameScene = () => {
-    if (!aframeContainerRef.current) return;
-
-    const videoSrc = getVideoSource(event.video_url);
-    
-    const aframeHTML = `
-      <a-scene 
-        embedded 
-        style="height: 500px; width: 100%;" 
-        vr-mode-ui="enabled: true"
-        background="color: #000"
-      >
-        <a-assets>
-          <video 
-            id="vrVideo" 
-            autoplay 
-            loop 
-            crossorigin="anonymous"
-            src="${videoSrc}"
-            muted
-          ></video>
-        </a-assets>
-        
-        <a-videosphere 
-          src="#vrVideo" 
-          rotation="0 180 0"
-        ></a-videosphere>
-        
-        <a-camera 
-          look-controls="enabled: true"
-          wasd-controls="enabled: false"
-          position="0 0 0"
-        >
-          <a-cursor
-            position="0 0 -1"
-            geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-            material="color: white; shader: flat"
-          ></a-cursor>
-        </a-camera>
-        
-        <a-light type="ambient" color="#404040"></a-light>
-      </a-scene>
-    `;
-    
-    aframeContainerRef.current.innerHTML = aframeHTML;
-  };
-
-  const enterVRMode = () => {
-    const aframeScene = aframeContainerRef.current?.querySelector('a-scene') as any;
-    if (aframeScene && aframeScene.enterVR) {
-      aframeScene.enterVR();
-      setIsVRActive(true);
-    }
-  };
-
   const resetView = () => {
-    const camera = aframeContainerRef.current?.querySelector('a-camera') as any;
-    if (camera) {
-      camera.setAttribute('rotation', '0 0 0');
+    setCameraRotation({ x: 0, y: 0 });
+  };
+
+  const enterVRMode = async () => {
+    if (navigator.xr) {
+      try {
+        const isSupported = await navigator.xr.isSessionSupported('immersive-vr');
+        if (isSupported) {
+          console.log("VR session would start here");
+        } else {
+          alert("VR not supported on this device");
+        }
+      } catch (error) {
+        console.error("VR check failed:", error);
+        alert("VR not available");
+      }
+    } else {
+      alert("WebXR not supported in this browser");
     }
   };
 
@@ -138,6 +129,8 @@ export const Video360Viewer = ({ event, onClose, isVRMode }: Video360ViewerProps
       </div>
     );
   }
+
+  const videoSrc = getVideoSource(event.video_url);
 
   return (
     <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -164,16 +157,19 @@ export const Video360Viewer = ({ event, onClose, isVRMode }: Video360ViewerProps
         <CardContent className="p-0 flex-1 relative">
           {/* 360° Video Player */}
           <div className="relative w-full h-96 bg-gradient-to-b from-purple-900/20 to-black">
-            {!isAFrameLoaded ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-muted-foreground">Loading VR Player...</p>
-                </div>
-              </div>
-            ) : (
-              <div ref={aframeContainerRef} className="w-full h-full" />
-            )}
+            <Canvas 
+              camera={{ 
+                position: [0, 0, 0.1], 
+                fov: 75,
+                rotation: [cameraRotation.x, cameraRotation.y, 0]
+              }}
+              className="w-full h-full"
+            >
+              <Suspense fallback={null}>
+                <Video360Sphere videoUrl={videoSrc} />
+                <Video360Controls />
+              </Suspense>
+            </Canvas>
             
             {/* Video Controls Overlay */}
             <div className="absolute bottom-4 left-4 right-4">
@@ -197,7 +193,6 @@ export const Video360Viewer = ({ event, onClose, isVRMode }: Video360ViewerProps
                   onClick={enterVRMode}
                   className="neon-glow bg-primary hover:bg-primary/90"
                   size="sm"
-                  disabled={!isAFrameLoaded}
                 >
                   <Headphones className="w-4 h-4 mr-2" />
                   Enter VR
