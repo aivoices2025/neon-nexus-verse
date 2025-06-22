@@ -28,11 +28,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     console.log("AuthProvider: Setting up Supabase auth listener...");
     
-    // Set up auth state listener FIRST
+    // Get initial session first
+    const getInitialSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      console.log("Initial session check:", session?.user?.email, error);
+      
+      if (session?.user) {
+        // Fetch user profile data from the profiles table
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username, avatar_url')
+          .eq('id', session.user.id)
+          .single();
+        
+        const authUser: AuthUser = {
+          ...session.user,
+          username: profile?.username || session.user.email?.split('@')[0] || 'User',
+          avatar: profile?.avatar_url || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face`,
+          joinedEvents: []
+        };
+        setUser(authUser);
+        setSession(session);
+      } else {
+        setUser(null);
+        setSession(null);
+      }
+      
+      setIsLoading(false);
+    };
+
+    getInitialSession();
+
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state changed:", event, session?.user?.email);
-        setSession(session);
         
         if (session?.user) {
           // Fetch user profile data from the profiles table
@@ -53,15 +83,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(null);
         }
         
+        setSession(session);
         setIsLoading(false);
       }
     );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Initial session check:", session?.user?.email);
-      // The auth state change listener will handle the user setup
-    });
 
     return () => {
       console.log("Cleaning up auth subscription");
@@ -86,6 +111,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       console.log("Login successful:", data.user?.email);
+      // Don't set loading to false here - let the auth state change handler do it
       return { success: true };
     } catch (error) {
       console.error("Login exception:", error);
