@@ -39,7 +39,8 @@ const Video360Sphere = ({ videoUrl }: { videoUrl: string }) => {
     const texture = new THREE.VideoTexture(video);
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
-    texture.format = THREE.RGBFormat;
+    // Fix: Use RGBAFormat instead of the deprecated RGBFormat
+    texture.format = THREE.RGBAFormat;
     
     setVideoTexture(texture);
     
