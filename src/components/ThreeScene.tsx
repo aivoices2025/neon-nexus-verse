@@ -1,8 +1,7 @@
 
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import { useRef, useState } from "react";
-import { Mesh, BoxGeometry, MeshStandardMaterial, SphereGeometry, PlaneGeometry, MeshBasicMaterial } from "three";
+import { Mesh } from "three";
 
 const InteractiveRoom = () => {
   const meshRef = useRef<Mesh>(null);
@@ -41,12 +40,6 @@ const InteractiveRoom = () => {
         <meshBasicMaterial color="#ffff00" />
       </mesh>
 
-      {/* Event title - using HTML overlay instead of Text component to avoid font dependencies */}
-      <mesh position={[0, 2, -5]}>
-        <boxGeometry args={[0.1, 0.1, 0.1]} />
-        <meshBasicMaterial color="transparent" opacity={0} transparent />
-      </mesh>
-
       {/* Lighting */}
       <ambientLight intensity={0.3} />
       <pointLight position={[0, 5, 0]} intensity={1} color="#7c3aed" />
@@ -61,7 +54,6 @@ export const ThreeScene = () => {
     <div className="w-full h-64 rounded-lg overflow-hidden border border-border/30 relative">
       <Canvas camera={{ position: [0, 2, 8], fov: 60 }}>
         <InteractiveRoom />
-        <OrbitControls enablePan={false} maxDistance={15} minDistance={3} />
       </Canvas>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
         <h3 className="text-xl font-bold text-white text-center bg-black/50 px-4 py-2 rounded">

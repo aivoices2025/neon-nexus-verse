@@ -1,7 +1,6 @@
 
 import { useRef, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import { Mesh, Group } from "three";
 
 interface Avatar {
@@ -23,7 +22,6 @@ const VRAvatar = ({ avatar }: VRAvatarProps) => {
   useFrame((state) => {
     if (bodyRef.current) {
       try {
-        // Gentle floating animation
         const floatY = Math.sin(state.clock.elapsedTime * 2) * 0.1;
         bodyRef.current.position.y = floatY;
       } catch (error) {
@@ -163,12 +161,6 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
         }}
       >
         <VRSpace />
-        <OrbitControls 
-          enablePan={!isVRMode} 
-          maxDistance={isVRMode ? 5 : 15} 
-          minDistance={isVRMode ? 1 : 3}
-          target={[0, 1, 0]}
-        />
       </Canvas>
       
       {!isVRMode && (

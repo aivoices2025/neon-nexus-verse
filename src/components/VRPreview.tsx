@@ -1,11 +1,10 @@
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Video, Users, Mic, MicOff, Camera, CameraOff } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 
 interface VRPreviewProps {
   event: any;
@@ -55,7 +54,6 @@ export const VRPreview = ({ event, onClose }: VRPreviewProps) => {
         const isSupported = await navigator.xr.isSessionSupported('immersive-vr');
         if (isSupported) {
           setVrMode(true);
-          // In a real app, this would initialize WebXR session
           console.log("VR session would start here");
         } else {
           alert("VR not supported on this device");
@@ -102,7 +100,6 @@ export const VRPreview = ({ event, onClose }: VRPreviewProps) => {
               className="bg-gradient-to-b from-purple-900/20 to-black"
             >
               <VirtualStage />
-              <OrbitControls enablePan={false} maxDistance={15} minDistance={3} />
             </Canvas>
             
             {/* Overlay UI */}
