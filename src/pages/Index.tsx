@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEvents } from "@/hooks/useEvents";
@@ -23,21 +24,25 @@ const Index = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isVRMode, setIsVRMode] = useState(false);
 
-  console.log("Index component render - user:", user?.email, "isLoading:", isLoading, "activeView:", activeView);
-  console.log("Events data:", events, "eventsLoading:", eventsLoading, "eventsError:", eventsError);
-  console.log("Events length:", events?.length);
-  console.log("Events array details:", events.map(e => ({ id: e.id, title: e.title, has_360_video: e.has_360_video })));
+  console.log("🌟 INDEX COMPONENT RENDER 🌟");
+  console.log("👤 User:", user ? user.email : "No user");
+  console.log("⏳ Auth loading:", isLoading);
+  console.log("📄 Current view:", activeView);
+  console.log("🎬 Events array:", events);
+  console.log("🔢 Events count:", events?.length || 0);
+  console.log("⏳ Events loading:", eventsLoading);
+  console.log("❌ Events error:", eventsError);
 
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     event.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  console.log("Filtered events:", filteredEvents.length);
+  console.log("🔍 Filtered events count:", filteredEvents.length);
 
   // Show loading state while checking authentication
   if (isLoading) {
-    console.log("Index: Showing loading state");
+    console.log("🔄 INDEX: Showing auth loading state");
     return (
       <div className="min-h-screen bg-background cyber-grid flex items-center justify-center">
         <div className="text-center">
@@ -50,30 +55,31 @@ const Index = () => {
 
   // If not authenticated, show login form
   if (!user) {
-    console.log("Index: User not authenticated, showing login form");
+    console.log("🚫 INDEX: User not authenticated, showing login form");
     return <LoginForm />;
   }
 
-  console.log("Index: User authenticated, rendering main app for user:", user.username);
+  console.log("✅ INDEX: User authenticated, rendering main app");
 
   const handleJoinEvent = (event: any) => {
-    console.log("Index: Joining event:", event.title, "has_360_video:", event.has_360_video, "video_url:", event.video_url);
+    console.log("🎯 JOINING EVENT:", event.title);
+    console.log("🎬 Event has 360 video:", event.has_360_video);
+    console.log("📹 Video URL:", event.video_url);
     setSelectedEvent(event);
   };
 
   const toggleVRMode = () => {
-    console.log("Index: Toggling VR mode from", isVRMode, "to", !isVRMode);
+    console.log("🥽 TOGGLING VR MODE from", isVRMode, "to", !isVRMode);
     setIsVRMode(!isVRMode);
     if (!isVRMode) {
-      // Initialize WebXR when entering VR mode
       if ('xr' in navigator) {
-        console.log("Entering VR mode...");
+        console.log("🚀 Entering VR mode...");
       }
     }
   };
 
   const handleViewChange = (view: "dashboard" | "events" | "profile") => {
-    console.log("Index: Changing view from", activeView, "to", view);
+    console.log("📄 CHANGING VIEW from", activeView, "to", view);
     setActiveView(view);
   };
 
@@ -163,14 +169,19 @@ const Index = () => {
             </div>
 
             {/* Debug Information */}
-            <div className="text-center text-sm text-muted-foreground">
-              Debug: Total events: {events.length}, Filtered: {filteredEvents.length}, Loading: {eventsLoading.toString()}, Error: {eventsError || "none"}
+            <div className="text-center text-sm text-muted-foreground bg-gray-800 p-4 rounded">
+              <h3 className="text-yellow-400 font-bold mb-2">🔍 DEBUG INFO:</h3>
+              <p>Total events: {events.length}</p>
+              <p>Filtered events: {filteredEvents.length}</p>
+              <p>Events loading: {eventsLoading.toString()}</p>
+              <p>Error: {eventsError || "none"}</p>
+              <p>User: {user.email}</p>
             </div>
 
             {/* Show error if there's one */}
             {eventsError && (
               <div className="text-center py-8">
-                <div className="text-red-400 mb-4">Error loading events: {eventsError}</div>
+                <div className="text-red-400 mb-4">❌ Error loading events: {eventsError}</div>
                 <Button onClick={refreshEvents} variant="outline">
                   Try Again
                 </Button>
@@ -180,16 +191,16 @@ const Index = () => {
             {eventsLoading ? (
               <div className="text-center py-8">
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Loading events...</p>
+                <p className="text-muted-foreground">⏳ Loading events...</p>
               </div>
             ) : (
               <>
                 {events.length === 0 && !eventsError && (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground mb-4">No events found in the database.</p>
+                  <div className="text-center py-8 bg-gray-800 rounded p-6">
+                    <p className="text-muted-foreground mb-4">📭 No events found in the database.</p>
                     <p className="text-sm text-muted-foreground">Try adding a new event using the form above!</p>
                     <Button onClick={refreshEvents} variant="outline" className="mt-4">
-                      Refresh Events
+                      🔄 Refresh Events
                     </Button>
                   </div>
                 )}
@@ -201,7 +212,7 @@ const Index = () => {
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-2xl font-bold flex items-center">
                           <span className="w-3 h-3 bg-red-500 rounded-full mr-3 animate-pulse"></span>
-                          Live VR Events
+                          🔴 Live VR Events
                         </h3>
                         <Badge variant="outline" className="border-red-500/50 text-red-400">
                           {filteredEvents.filter(e => e.is_live).length} Live Now
@@ -209,26 +220,26 @@ const Index = () => {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredEvents.filter(event => event.is_live).map((event) => {
-                          console.log("Rendering live event:", event.id, event.title);
+                          console.log("🎬 Rendering live event:", event.id, event.title);
                           return <EventCard key={event.id} event={event} onJoin={handleJoinEvent} />;
                         })}
                       </div>
                       {filteredEvents.filter(e => e.is_live).length === 0 && (
-                        <p className="text-center text-muted-foreground py-8">No live events at the moment</p>
+                        <p className="text-center text-muted-foreground py-8">🚫 No live events at the moment</p>
                       )}
                     </section>
 
                     {/* Upcoming Events */}
                     <section>
-                      <h3 className="text-2xl font-bold mb-6">Upcoming VR Events</h3>
+                      <h3 className="text-2xl font-bold mb-6">📅 Upcoming VR Events</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {filteredEvents.filter(event => !event.is_live).map((event) => {
-                          console.log("Rendering upcoming event:", event.id, event.title);
+                          console.log("📅 Rendering upcoming event:", event.id, event.title);
                           return <EventCard key={event.id} event={event} onJoin={handleJoinEvent} />;
                         })}
                       </div>
                       {filteredEvents.filter(e => !e.is_live).length === 0 && (
-                        <p className="text-center text-muted-foreground py-8">No upcoming events</p>
+                        <p className="text-center text-muted-foreground py-8">📭 No upcoming events</p>
                       )}
                     </section>
                   </>
@@ -278,7 +289,7 @@ const Index = () => {
         <Video360Viewer
           event={selectedEvent}
           onClose={() => {
-            console.log("Index: Closing video viewer");
+            console.log("❌ INDEX: Closing video viewer");
             setSelectedEvent(null);
           }}
           isVRMode={isVRMode}

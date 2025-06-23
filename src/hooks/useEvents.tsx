@@ -27,49 +27,54 @@ export const useEvents = () => {
 
   const fetchEvents = async () => {
     try {
-      console.log("useEvents: Starting to fetch VR events...");
-      console.log("useEvents: Supabase client ready:", !!supabase);
+      console.log("🔥 STARTING EVENT FETCH 🔥");
+      console.log("📊 Supabase client available:", !!supabase);
+      console.log("👤 Current user:", user ? user.email : "No user");
       
       const { data, error } = await supabase
         .from('vr_events')
         .select('*')
         .order('created_at', { ascending: false });
 
-      console.log("useEvents: Query completed");
-      console.log("useEvents: Raw data received:", data);
-      console.log("useEvents: Error received:", error);
-      console.log("useEvents: Data length:", data?.length || 0);
+      console.log("✅ QUERY COMPLETE ✅");
+      console.log("📋 Raw data from database:", data);
+      console.log("❌ Error from database:", error);
+      console.log("🔢 Number of events found:", data?.length || 0);
       
-      // Debug each event
       if (data && data.length > 0) {
+        console.log("🎬 EVENT DETAILS:");
         data.forEach((event, index) => {
-          console.log(`useEvents: Event ${index + 1}:`, {
+          console.log(`Event ${index + 1}:`, {
             id: event.id,
             title: event.title,
+            category: event.category,
+            is_live: event.is_live,
             has_360_video: event.has_360_video,
-            video_url: event.video_url,
-            is_live: event.is_live
+            video_url: event.video_url
           });
         });
+      } else {
+        console.log("⚠️ NO EVENTS FOUND IN DATABASE");
       }
 
       if (error) {
-        console.error("useEvents: Database error:", error);
-        console.error("useEvents: Error details:", JSON.stringify(error, null, 2));
+        console.error("💥 DATABASE ERROR:", error);
+        console.error("💥 Error message:", error.message);
+        console.error("💥 Error code:", error.code);
         setError(error.message);
-        setEvents([]); // Clear events on error
+        setEvents([]);
         return;
       }
 
-      console.log("useEvents: Setting events data:", data?.length || 0, "events");
+      console.log("✨ SETTING EVENTS STATE WITH", data?.length || 0, "EVENTS");
       setEvents(data || []);
       setError(null);
     } catch (err) {
-      console.error("useEvents: Exception during fetch:", err);
+      console.error("🚨 EXCEPTION DURING FETCH:", err);
       setError("Failed to load events");
-      setEvents([]); // Clear events on exception
+      setEvents([]);
     } finally {
-      console.log("useEvents: Setting loading to false");
+      console.log("🏁 SETTING LOADING TO FALSE");
       setIsLoading(false);
     }
   };
@@ -146,11 +151,17 @@ export const useEvents = () => {
   };
 
   useEffect(() => {
-    console.log("useEvents: useEffect triggered, user:", user?.email || "not authenticated");
+    console.log("🚀 useEvents EFFECT TRIGGERED");
+    console.log("👤 User in effect:", user ? user.email : "No user");
     fetchEvents();
   }, []);
 
-  console.log("useEvents: Hook render - events:", events.length, "isLoading:", isLoading, "error:", error);
+  console.log("🔄 useEvents HOOK RENDER:", {
+    eventsCount: events.length,
+    isLoading,
+    error,
+    hasUser: !!user
+  });
 
   return {
     events,
