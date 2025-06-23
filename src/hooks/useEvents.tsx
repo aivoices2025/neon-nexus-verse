@@ -36,14 +36,28 @@ export const useEvents = () => {
         .order('created_at', { ascending: false });
 
       console.log("useEvents: Query completed");
-      console.log("useEvents: Data received:", data);
+      console.log("useEvents: Raw data received:", data);
       console.log("useEvents: Error received:", error);
       console.log("useEvents: Data length:", data?.length || 0);
+      
+      // Debug each event
+      if (data && data.length > 0) {
+        data.forEach((event, index) => {
+          console.log(`useEvents: Event ${index + 1}:`, {
+            id: event.id,
+            title: event.title,
+            has_360_video: event.has_360_video,
+            video_url: event.video_url,
+            is_live: event.is_live
+          });
+        });
+      }
 
       if (error) {
         console.error("useEvents: Database error:", error);
         console.error("useEvents: Error details:", JSON.stringify(error, null, 2));
         setError(error.message);
+        setEvents([]); // Clear events on error
         return;
       }
 
@@ -53,6 +67,7 @@ export const useEvents = () => {
     } catch (err) {
       console.error("useEvents: Exception during fetch:", err);
       setError("Failed to load events");
+      setEvents([]); // Clear events on exception
     } finally {
       console.log("useEvents: Setting loading to false");
       setIsLoading(false);
@@ -131,11 +146,11 @@ export const useEvents = () => {
   };
 
   useEffect(() => {
-    console.log("useEvents: useEffect triggered");
+    console.log("useEvents: useEffect triggered, user:", user?.email || "not authenticated");
     fetchEvents();
   }, []);
 
-  console.log("useEvents: Returning state - events:", events.length, "isLoading:", isLoading, "error:", error);
+  console.log("useEvents: Hook render - events:", events.length, "isLoading:", isLoading, "error:", error);
 
   return {
     events,
