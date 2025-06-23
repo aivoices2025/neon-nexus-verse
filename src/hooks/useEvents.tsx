@@ -27,25 +27,34 @@ export const useEvents = () => {
 
   const fetchEvents = async () => {
     try {
-      console.log("Fetching VR events...");
+      console.log("useEvents: Starting to fetch VR events...");
+      console.log("useEvents: Supabase client ready:", !!supabase);
+      
       const { data, error } = await supabase
         .from('vr_events')
         .select('*')
         .order('created_at', { ascending: false });
 
+      console.log("useEvents: Query completed");
+      console.log("useEvents: Data received:", data);
+      console.log("useEvents: Error received:", error);
+      console.log("useEvents: Data length:", data?.length || 0);
+
       if (error) {
-        console.error("Error fetching events:", error);
+        console.error("useEvents: Database error:", error);
+        console.error("useEvents: Error details:", JSON.stringify(error, null, 2));
         setError(error.message);
         return;
       }
 
-      console.log("Fetched events:", data?.length);
+      console.log("useEvents: Setting events data:", data?.length || 0, "events");
       setEvents(data || []);
       setError(null);
     } catch (err) {
-      console.error("Exception fetching events:", err);
+      console.error("useEvents: Exception during fetch:", err);
       setError("Failed to load events");
     } finally {
+      console.log("useEvents: Setting loading to false");
       setIsLoading(false);
     }
   };
@@ -56,7 +65,7 @@ export const useEvents = () => {
     }
 
     try {
-      console.log("Creating new event:", eventData.title);
+      console.log("useEvents: Creating new event:", eventData.title);
       const { data, error } = await supabase
         .from('vr_events')
         .insert([{
@@ -68,15 +77,15 @@ export const useEvents = () => {
         .single();
 
       if (error) {
-        console.error("Error creating event:", error);
+        console.error("useEvents: Error creating event:", error);
         throw new Error(error.message);
       }
 
-      console.log("Event created successfully:", data?.title);
+      console.log("useEvents: Event created successfully:", data?.title);
       await fetchEvents(); // Refresh the events list
       return data;
     } catch (err) {
-      console.error("Exception creating event:", err);
+      console.error("useEvents: Exception creating event:", err);
       throw err;
     }
   };
@@ -87,7 +96,7 @@ export const useEvents = () => {
     }
 
     try {
-      console.log("Joining event:", eventId);
+      console.log("useEvents: Joining event:", eventId);
       // Get current event data first
       const { data: currentEvent, error: fetchError } = await supabase
         .from('vr_events')
@@ -96,7 +105,7 @@ export const useEvents = () => {
         .single();
 
       if (fetchError) {
-        console.error("Error fetching current event:", fetchError);
+        console.error("useEvents: Error fetching current event:", fetchError);
         throw new Error(fetchError.message);
       }
 
@@ -109,21 +118,24 @@ export const useEvents = () => {
         .eq('id', eventId);
 
       if (error) {
-        console.error("Error joining event:", error);
+        console.error("useEvents: Error joining event:", error);
         throw new Error(error.message);
       }
 
-      console.log("Successfully joined event");
+      console.log("useEvents: Successfully joined event");
       await fetchEvents(); // Refresh the events list
     } catch (err) {
-      console.error("Exception joining event:", err);
+      console.error("useEvents: Exception joining event:", err);
       throw err;
     }
   };
 
   useEffect(() => {
+    console.log("useEvents: useEffect triggered");
     fetchEvents();
   }, []);
+
+  console.log("useEvents: Returning state - events:", events.length, "isLoading:", isLoading, "error:", error);
 
   return {
     events,

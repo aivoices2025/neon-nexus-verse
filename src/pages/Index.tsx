@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEvents } from "@/hooks/useEvents";
@@ -18,14 +17,15 @@ import { Search, Video, Users, Headphones } from "lucide-react";
 
 const Index = () => {
   const { user, logout, isLoading } = useAuth();
-  const { events, isLoading: eventsLoading, refreshEvents } = useEvents();
+  const { events, isLoading: eventsLoading, error: eventsError, refreshEvents } = useEvents();
   const [activeView, setActiveView] = useState<"dashboard" | "events" | "profile">("dashboard");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isVRMode, setIsVRMode] = useState(false);
 
   console.log("Index component render - user:", user?.email, "isLoading:", isLoading, "activeView:", activeView);
-  console.log("Events data:", events, "eventsLoading:", eventsLoading);
+  console.log("Events data:", events, "eventsLoading:", eventsLoading, "eventsError:", eventsError);
+  console.log("Events length:", events?.length);
 
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -164,6 +164,16 @@ const Index = () => {
                 </Badge>
               </div>
 
+              {/* Show error if there's one */}
+              {eventsError && (
+                <div className="text-center py-8">
+                  <div className="text-red-400 mb-4">Error loading events: {eventsError}</div>
+                  <Button onClick={refreshEvents} variant="outline">
+                    Try Again
+                  </Button>
+                </div>
+              )}
+
               {eventsLoading ? (
                 <div className="text-center py-8">
                   <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -172,39 +182,47 @@ const Index = () => {
               ) : (
                 <>
                   {/* Debug: Show raw events data */}
-                  {events.length === 0 && (
+                  {events.length === 0 && !eventsError && (
                     <div className="text-center py-8">
-                      <p className="text-muted-foreground">No events found. Try adding a new event!</p>
+                      <p className="text-muted-foreground mb-4">No events found in the database.</p>
+                      <p className="text-sm text-muted-foreground">Try adding a new event using the form above!</p>
+                      <Button onClick={refreshEvents} variant="outline" className="mt-4">
+                        Refresh Events
+                      </Button>
                     </div>
                   )}
 
-                  {/* Live Events */}
-                  <section>
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-2xl font-bold flex items-center">
-                        <span className="w-3 h-3 bg-red-500 rounded-full mr-3 animate-pulse"></span>
-                        Live VR Events
-                      </h3>
-                      <Badge variant="outline" className="border-red-500/50 text-red-400">
-                        {filteredEvents.filter(e => e.is_live).length} Live Now
-                      </Badge>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {filteredEvents.filter(event => event.is_live).map((event) => (
-                        <EventCard key={event.id} event={event} onJoin={handleJoinEvent} />
-                      ))}
-                    </div>
-                  </section>
+                  {events.length > 0 && (
+                    <>
+                      {/* Live Events */}
+                      <section>
+                        <div className="flex items-center justify-between mb-6">
+                          <h3 className="text-2xl font-bold flex items-center">
+                            <span className="w-3 h-3 bg-red-500 rounded-full mr-3 animate-pulse"></span>
+                            Live VR Events
+                          </h3>
+                          <Badge variant="outline" className="border-red-500/50 text-red-400">
+                            {filteredEvents.filter(e => e.is_live).length} Live Now
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {filteredEvents.filter(event => event.is_live).map((event) => (
+                            <EventCard key={event.id} event={event} onJoin={handleJoinEvent} />
+                          ))}
+                        </div>
+                      </section>
 
-                  {/* Upcoming Events */}
-                  <section>
-                    <h3 className="text-2xl font-bold mb-6">Upcoming VR Events</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                      {filteredEvents.filter(event => !event.is_live).map((event) => (
-                        <EventCard key={event.id} event={event} onJoin={handleJoinEvent} />
-                      ))}
-                    </div>
-                  </section>
+                      {/* Upcoming Events */}
+                      <section>
+                        <h3 className="text-2xl font-bold mb-6">Upcoming VR Events</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          {filteredEvents.filter(event => !event.is_live).map((event) => (
+                            <EventCard key={event.id} event={event} onJoin={handleJoinEvent} />
+                          ))}
+                        </div>
+                      </section>
+                    </>
+                  )}
                 </>
               )}
             </div>
