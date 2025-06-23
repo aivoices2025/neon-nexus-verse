@@ -25,6 +25,7 @@ const Index = () => {
   const [isVRMode, setIsVRMode] = useState(false);
 
   console.log("Index component render - user:", user?.email, "isLoading:", isLoading, "activeView:", activeView);
+  console.log("Events data:", events, "eventsLoading:", eventsLoading);
 
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -170,6 +171,13 @@ const Index = () => {
                 </div>
               ) : (
                 <>
+                  {/* Debug: Show raw events data */}
+                  {events.length === 0 && (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">No events found. Try adding a new event!</p>
+                    </div>
+                  )}
+
                   {/* Live Events */}
                   <section>
                     <div className="flex items-center justify-between mb-6">
