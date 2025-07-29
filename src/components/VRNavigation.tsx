@@ -2,11 +2,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Home, Video, User, LogOut, Headphones } from "lucide-react";
+import { GraduationCap, Home, Video, User, LogOut, Headphones } from "lucide-react";
 
 interface VRNavigationProps {
-  currentView: "dashboard" | "events" | "profile";
-  onViewChange: (view: "dashboard" | "events" | "profile") => void;
+  currentView: "dashboard" | "events" | "profile" | "classroom";
+  onViewChange: (view: "dashboard" | "events" | "profile" | "classroom") => void;
   isVRMode: boolean;
   onToggleVR: () => void;
   user: any;
@@ -50,6 +50,15 @@ export const VRNavigation = ({
             className="border-border/30"
           >
             <User className="w-4 h-4" />
+          </Button>
+          
+          <Button
+            variant={currentView === "classroom" ? "default" : "outline"}
+            size="sm"
+            onClick={() => onViewChange("classroom")}
+            className="border-border/30"
+          >
+            <GraduationCap className="w-4 h-4" />
           </Button>
           
           <div className="w-px h-6 bg-border/30 mx-2"></div>

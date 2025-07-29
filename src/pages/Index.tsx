@@ -8,6 +8,7 @@ import { VRAvatarSystem } from "@/components/VRAvatarSystem";
 import { EventCard } from "@/components/EventCard";
 import { DashboardStats } from "@/components/DashboardStats";
 import { ChatPanel } from "@/components/ChatPanel";
+import { Classroom } from "@/components/Classroom";
 import { AddEventForm } from "@/components/AddEventForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +19,7 @@ import { Search, Video, Users, Headphones } from "lucide-react";
 const Index = () => {
   const { user, logout, isLoading } = useAuth();
   const { events, isLoading: eventsLoading, error: eventsError, refreshEvents } = useEvents();
-  const [activeView, setActiveView] = useState<"dashboard" | "events" | "profile">("dashboard");
+  const [activeView, setActiveView] = useState<"dashboard" | "events" | "profile" | "classroom">("dashboard");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isVRMode, setIsVRMode] = useState(false);
@@ -83,7 +84,7 @@ const Index = () => {
     }
   };
 
-  const handleViewChange = (view: "dashboard" | "events" | "profile") => {
+  const handleViewChange = (view: "dashboard" | "events" | "profile" | "classroom") => {
     console.log("📄 CHANGING VIEW from", activeView, "to", view);
     setActiveView(view);
   };
@@ -304,6 +305,10 @@ const Index = () => {
               </CardContent>
             </Card>
           </div>
+        )}
+
+        {activeView === "classroom" && (
+          <Classroom />
         )}
       </main>
 
