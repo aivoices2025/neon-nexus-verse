@@ -25,7 +25,11 @@ export const LoginForm = () => {
     
     const result = await login(email, password);
     if (!result.success) {
-      setError(result.error || "Login failed. Please try again.");
+      if (result.error?.includes("Email not confirmed")) {
+        setError("Please check your email and click the confirmation link before logging in. Or disable email confirmation in Supabase settings for testing.");
+      } else {
+        setError(result.error || "Login failed. Please try again.");
+      }
     }
   };
 
