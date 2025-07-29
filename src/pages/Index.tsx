@@ -34,14 +34,14 @@ const Index = () => {
     error: eventsError
   });
 
-  const filteredEvents = events.filter(event =>
+  const filteredEvents = (events || []).filter(event =>
     event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     event.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   console.log("🔍 Filtering Results:", {
     searchQuery,
-    totalEvents: events.length,
+    totalEvents: (events || []).length,
     filteredCount: filteredEvents.length
   });
 
@@ -181,7 +181,7 @@ const Index = () => {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-left">
                 <div>
                   <p className="text-cyan-400 font-semibold">Database Status:</p>
-                  <p>Total events: {events.length}</p>
+                  <p>Total events: {(events || []).length}</p>
                   <p>Filtered events: {filteredEvents.length}</p>
                   <p>Loading: {eventsLoading ? "Yes" : "No"}</p>
                 </div>
@@ -217,7 +217,7 @@ const Index = () => {
               </div>
             ) : (
               <>
-                {events.length === 0 && !eventsError && (
+                {(events || []).length === 0 && !eventsError && (
                   <div className="text-center py-12 bg-gray-800 rounded-lg">
                     <div className="text-6xl mb-4">📭</div>
                     <p className="text-muted-foreground mb-4 text-lg">No events found in the database.</p>
@@ -228,7 +228,7 @@ const Index = () => {
                   </div>
                 )}
 
-                {events.length > 0 && (
+                {(events || []).length > 0 && (
                   <>
                     {/* Live Events */}
                     <section>
@@ -289,7 +289,7 @@ const Index = () => {
                 
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div className="p-4 bg-primary/10 rounded-lg">
-                    <div className="text-2xl font-bold text-primary">{events.filter(e => e.created_by === user.id).length}</div>
+                    <div className="text-2xl font-bold text-primary">{(events || []).filter(e => e.created_by === user.id).length}</div>
                     <div className="text-sm text-muted-foreground">Events Created</div>
                   </div>
                   <div className="p-4 bg-cyan-500/10 rounded-lg">
