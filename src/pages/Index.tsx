@@ -14,6 +14,9 @@ import { AddEventForm } from "@/components/AddEventForm";
 import { MetaverseHub } from "@/components/MetaverseHub";
 import { LearningPath } from "@/components/LearningPath";
 import { InteractiveLab } from "@/components/InteractiveLab";
+import { MetaQuestControls } from "@/components/MetaQuestControls";
+import { VRClassroom } from "@/components/VRClassroom";
+import { useVRSession } from "@/hooks/useVRSession";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,10 +26,10 @@ import { Search, Video, Users, Headphones } from "lucide-react";
 const Index = () => {
   const { user, logout, isLoading } = useAuth();
   const { events, isLoading: eventsLoading, error: eventsError, refreshEvents } = useEvents();
+  const { isVRSupported, isVRActive, enterVR, exitVR } = useVRSession();
   const [activeView, setActiveView] = useState<"dashboard" | "events" | "profile" | "classroom" | "metaverse" | "learning" | "lab">("dashboard");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [isVRMode, setIsVRMode] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Helper functions at component level
@@ -37,13 +40,15 @@ const Index = () => {
     setSelectedEvent(event);
   };
 
-  const toggleVRMode = () => {
-    console.log("🥽 TOGGLING VR MODE from", isVRMode, "to", !isVRMode);
-    setIsVRMode(!isVRMode);
-    if (!isVRMode) {
-      if ('xr' in navigator) {
-        console.log("🚀 Entering VR mode...");
-      }
+  const toggleVRMode = async () => {
+    console.log("🥽 TOGGLING VR MODE from", isVRActive, "to", !isVRActive);
+    
+    if (isVRActive) {
+      console.log("🚪 Exiting VR mode...");
+      await exitVR();
+    } else {
+      console.log("🚀 Entering VR mode...");
+      await enterVR();
     }
   };
 
@@ -55,6 +60,7 @@ const Index = () => {
   console.log("🌟 INDEX COMPONENT RENDER START 🌟");
   console.log("👤 Auth User:", user ? `${user.email} (ID: ${user.id})` : "No user");
   console.log("⏳ Auth Loading State:", isLoading);
+  console.log("🥽 VR Status:", { supported: isVRSupported, active: isVRActive });
   console.log("📄 Current Active View:", activeView);
   console.log("🎬 Events Data:", {
     count: events?.length || 0,
@@ -111,12 +117,12 @@ const Index = () => {
   console.log("🎨 INDEX: About to render main UI");
 
   return (
-    <div className={`min-h-screen bg-background cyber-grid ${isVRMode ? 'vr-mode' : ''}`}>
+    <div className={`min-h-screen bg-background cyber-grid ${isVRActive ? 'vr-mode' : ''}`}>
       {/* VR Navigation */}
       <VRNavigation
         currentView={activeView}
         onViewChange={handleViewChange}
-        isVRMode={isVRMode}
+        isVRMode={isVRActive}
         onToggleVR={toggleVRMode}
         user={user}
         onLogout={logout}
@@ -132,8 +138,8 @@ const Index = () => {
               </h2>
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
                 {user.isNewUser 
-                  ? "🎉 Welcome to the VR Learning Metaverse! Your immersive education journey starts here." 
-                  : "Ready to continue your VR learning adventure? Dive into immersive 3D environments and expand your skills!"
+                  ? "🎉 Welcome to the VR Learning Metaverse! Teach and learn in immersive 3D classrooms with your Meta Quest 3S." 
+                  : "Ready to continue your VR learning adventure? Enter virtual classrooms, teach students worldwide, and explore immersive 3D environments!"
                 }
                 <br />
                 <span className="text-sm opacity-75">
@@ -146,14 +152,14 @@ const Index = () => {
                 <VRAvatarSystem 
                   currentUser={user} 
                   eventId="preview" 
-                  isVRMode={isVRMode}
+                  isVRMode={isVRActive}
                 />
                 <p className="text-sm text-muted-foreground mt-2">
-                  {isVRMode ? "VR Mode Active - Move your head to look around" : "3D virtual space preview - Click and drag to explore"}
+                  {isVRActive ? "🥽 VR Mode Active - Move your head to look around" : "3D virtual space preview - Click and drag to explore"}
                 </p>
               </div>
               
-              <div className="flex justify-center space-x-4 flex-wrap gap-4">
+              <div className="flex justify-center space-x-4 flex-wrap gap-4 mb-8">
                 <Button 
                   size="lg" 
                   className="neon-glow bg-primary hover:bg-primary/90"
@@ -161,6 +167,14 @@ const Index = () => {
                 >
                   <Video className="w-5 h-5 mr-2" />
                   Enter Metaverse
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-purple-400/50 hover:neon-glow"
+                  onClick={() => handleViewChange("classroom")}
+                >
+                  🎓 VR Classroom
                 </Button>
                 <Button 
                   size="lg" 
@@ -181,13 +195,49 @@ const Index = () => {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-primary/50 hover:neon-glow"
+                  className={`border-primary/50 hover:neon-glow ${!isVRSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
                   onClick={toggleVRMode}
+                  disabled={!isVRSupported}
                 >
                   <Headphones className="w-5 h-5 mr-2" />
-                  {isVRMode ? "Exit VR Mode" : "Enter VR Mode"}
+                  {isVRActive ? "Exit VR Mode" : "Enter VR Mode"}
+                  {!isVRSupported && " (Not Available)"}
                 </Button>
               </div>
+              
+              {/* Meta Quest 3S Controls */}
+              <div className="max-w-2xl mx-auto mb-8">
+                <MetaQuestControls 
+                  isVRMode={isVRActive}
+                  onToggleVR={toggleVRMode}
+                  onSettingsChange={(setting, value) => {
+                    console.log(`VR Setting changed: ${setting} = ${value}`);
+                  }}
+                />
+              </div>
+              
+              {/* VR Status Display */}
+              {isVRSupported && (
+                <div className="max-w-md mx-auto mb-8 p-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-lg border border-green-500/20">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className={`w-3 h-3 rounded-full ${isVRActive ? 'bg-green-500 animate-pulse' : 'bg-blue-500'}`}></div>
+                    <p className="text-center font-semibold">
+                      {isVRActive ? 
+                        "🥽 VR Session Active - You're in the Metaverse!" : 
+                        "🚀 Meta Quest 3S Ready - Click Enter VR to start!"
+                      }
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {!isVRSupported && (
+                <div className="max-w-md mx-auto mb-8 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-500/20">
+                  <p className="text-center text-yellow-400">
+                    ⚠️ VR not detected. Connect your Meta Quest 3S and refresh the page.
+                  </p>
+                </div>
+              )}
             </section>
 
             <DashboardStats />
@@ -349,7 +399,7 @@ const Index = () => {
         )}
 
         {activeView === "classroom" && (
-          <Classroom />
+          <VRClassroom user={user} isVRMode={isVRActive} />
         )}
 
         {activeView === "metaverse" && (
@@ -373,7 +423,7 @@ const Index = () => {
             console.log("❌ INDEX: Closing video viewer");
             setSelectedEvent(null);
           }}
-          isVRMode={isVRMode}
+          isVRMode={isVRActive}
         />
       )}
 
