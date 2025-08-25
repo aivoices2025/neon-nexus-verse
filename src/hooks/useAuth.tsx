@@ -7,6 +7,8 @@ interface AuthUser extends User {
   username?: string;
   avatar?: string;
   joinedEvents?: string[];
+  provider?: string;
+  isNewUser?: boolean;
 }
 
 interface AuthContextType {
@@ -14,6 +16,7 @@ interface AuthContextType {
   session: Session | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signup: (username: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  updateProfile: (updates: { username?: string; avatar?: string }) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -25,6 +28,92 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const createOrUpdateProfile = async (userId: string, userData: any, isNewUser: boolean = false) => {
+    try {
+      // Extract username from various sources
+      let username = userData.user_metadata?.username || 
+                    userData.user_metadata?.name || 
+                    userData.user_metadata?.full_name ||
+                    userData.email?.split('@')[0] || 
+                    'User';
+
+      // Extract avatar from various sources
+      let avatar = userData.user_metadata?.avatar_url ||
+                  userData.user_metadata?.picture ||
+                  `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face`;
+
+      // Get provider info
+      const provider = userData.app_metadata?.provider || 'email';
+
+      console.log('Creating/updating profile for user:', {
+        userId,
+        username,
+        provider,
+        isNewUser
+      });
+
+      // Check if profile exists
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (existingProfile) {
+        // Update existing profile
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            username: existingProfile.username || username,
+            avatar_url: existingProfile.avatar_url || avatar,
+            last_login: new Date().toISOString(),
+          })
+          .eq('id', userId);
+
+        if (error) {
+          console.error('Error updating profile:', error);
+        }
+
+        return {
+          username: existingProfile.username || username,
+          avatar: existingProfile.avatar_url || avatar,
+          provider,
+          isNewUser: false
+        };
+      } else {
+        // Create new profile
+        const { error } = await supabase
+          .from('profiles')
+          .insert({
+            id: userId,
+            username,
+            avatar_url: avatar,
+            created_at: new Date().toISOString(),
+            last_login: new Date().toISOString(),
+          });
+
+        if (error) {
+          console.error('Error creating profile:', error);
+        }
+
+        return {
+          username,
+          avatar,
+          provider,
+          isNewUser: true
+        };
+      }
+    } catch (error) {
+      console.error('Error in createOrUpdateProfile:', error);
+      return {
+        username: userData.email?.split('@')[0] || 'User',
+        avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face`,
+        provider: 'email',
+        isNewUser: false
+      };
+    }
+  };
+
   useEffect(() => {
     console.log("AuthProvider: Setting up Supabase auth listener...");
     
@@ -34,17 +123,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log("Initial session check:", session?.user?.email, error);
       
       if (session?.user) {
-        // Fetch user profile data from the profiles table
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('username, avatar_url')
-          .eq('id', session.user.id)
-          .single();
+        const profileData = await createOrUpdateProfile(session.user.id, session.user);
         
         const authUser: AuthUser = {
           ...session.user,
-          username: profile?.username || session.user.email?.split('@')[0] || 'User',
-          avatar: profile?.avatar_url || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face`,
+          username: profileData.username,
+          avatar: profileData.avatar,
+          provider: profileData.provider,
+          isNewUser: profileData.isNewUser,
           joinedEvents: []
         };
         setUser(authUser);
@@ -65,17 +151,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("Auth state changed:", event, session?.user?.email);
         
         if (session?.user) {
-          // Fetch user profile data from the profiles table
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('username, avatar_url')
-            .eq('id', session.user.id)
-            .single();
+          const profileData = await createOrUpdateProfile(session.user.id, session.user);
+          
+          // Check if this is a new user based on profile data
+          const isNewUser = profileData.isNewUser || false;
           
           const authUser: AuthUser = {
             ...session.user,
-            username: profile?.username || session.user.email?.split('@')[0] || 'User',
-            avatar: profile?.avatar_url || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face`,
+            username: profileData.username,
+            avatar: profileData.avatar,
+            provider: profileData.provider,
+            isNewUser: isNewUser,
             joinedEvents: []
           };
           setUser(authUser);
@@ -154,6 +240,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const updateProfile = async (updates: { username?: string; avatar?: string }) => {
+    if (!user) {
+      return { success: false, error: "No user logged in" };
+    }
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          username: updates.username,
+          avatar_url: updates.avatar,
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error("Profile update error:", error);
+        return { success: false, error: error.message };
+      }
+
+      // Update local user state
+      setUser({
+        ...user,
+        username: updates.username || user.username,
+        avatar: updates.avatar || user.avatar,
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error("Profile update exception:", error);
+      return { success: false, error: "An unexpected error occurred" };
+    }
+  };
+
   const logout = async () => {
     console.log("Logout: Clearing user session...");
     await supabase.auth.signOut();
@@ -165,7 +284,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   console.log("AuthProvider render - user:", user?.email, "isLoading:", isLoading);
 
   return (
-    <AuthContext.Provider value={{ user, session, login, signup, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, session, login, signup, updateProfile, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
