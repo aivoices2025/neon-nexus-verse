@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Headphones, Hand, Gamepad2, Eye, Volume2, Settings } from 'lucide-react';
+import { WorkingVRButton } from './WorkingVRButton';
 import { useVRSession } from '@/hooks/useVRSession';
 
 interface MetaQuestControlsProps {
@@ -70,14 +71,14 @@ export const MetaQuestControls = ({ isVRMode, onToggleVR, onSettingsChange }: Me
               </p>
             </div>
           </div>
-          <Button
-            onClick={onToggleVR}
+          <WorkingVRButton 
             size="lg"
-            className={isVRMode ? "neon-glow bg-red-600 hover:bg-red-700" : "neon-glow bg-primary hover:bg-primary/90"}
-            disabled={!isVRSupported}
-          >
-            {isVRMode ? "Exit VR" : "Enter VR"}
-          </Button>
+            className="neon-glow"
+            onVRStateChange={(vrActive) => {
+              console.log('✅ Meta Quest VR State changed:', vrActive);
+              onSettingsChange?.('vrMode', vrActive);
+            }}
+          />
         </div>
 
         {/* Controller Options */}

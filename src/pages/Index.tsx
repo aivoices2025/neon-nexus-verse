@@ -16,6 +16,7 @@ import { LearningPath } from "@/components/LearningPath";
 import { InteractiveLab } from "@/components/InteractiveLab";
 import { MetaQuestControls } from "@/components/MetaQuestControls";
 import { VRClassroom } from "@/components/VRClassroom";
+import { WorkingVRButton } from "@/components/WorkingVRButton";
 import { useVRSession } from "@/hooks/useVRSession";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -192,17 +193,14 @@ const Index = () => {
                 >
                   🧪 Interactive Lab
                 </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className={`border-primary/50 hover:neon-glow ${!isVRSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={toggleVRMode}
-                  disabled={!isVRSupported}
-                >
-                  <Headphones className="w-5 h-5 mr-2" />
-                  {isVRActive ? "Exit VR Mode" : "Enter VR Mode"}
-                  {!isVRSupported && " (Not Available)"}
-                </Button>
+                <WorkingVRButton 
+                  size="lg"
+                  className="border-primary/50 hover:neon-glow"
+                  onVRStateChange={(vrActive) => {
+                    console.log('✅ VR State changed in main dashboard:', vrActive);
+                    // Update any VR-related state here
+                  }}
+                />
               </div>
               
               {/* Meta Quest 3S Controls */}

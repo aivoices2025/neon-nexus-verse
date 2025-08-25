@@ -1,7 +1,10 @@
 
 import { useRef, useEffect, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Mesh, Group, Vector3 } from "three";
+import { useFrame } from "@react-three/fiber";
+import { Mesh, Group } from "three";
+import { VRCanvas } from "./VRCanvas";
+
+
 
 interface Avatar {
   id: string;
@@ -176,7 +179,6 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
 
   const VRSpace = () => {
     console.log("VRAvatarSystem: Rendering VRSpace component");
-    const { camera } = useThree();
     const [handTrackingEnabled, setHandTrackingEnabled] = useState(false);
     
     // Check for Meta Quest 3S features
@@ -244,11 +246,11 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
         
         {/* Interactive Learning Zones */}
         {[
-          { pos: [-6, 1, -4], color: "#00ff00" },
-          { pos: [6, 1, -4], color: "#ff6600" },
-          { pos: [0, 1, 2], color: "#ff00ff" },
-          { pos: [-4, 1, 6], color: "#ffff00" },
-          { pos: [4, 1, 6], color: "#ff0066" }
+          { pos: [-6, 1, -4] as [number, number, number], color: "#00ff00" },
+          { pos: [6, 1, -4] as [number, number, number], color: "#ff6600" },
+          { pos: [0, 1, 2] as [number, number, number], color: "#ff00ff" },
+          { pos: [-4, 1, 6] as [number, number, number], color: "#ffff00" },
+          { pos: [4, 1, 6] as [number, number, number], color: "#ff0066" }
         ].map((zone, i) => (
           <group key={`zone-${i}`}>
             <mesh position={zone.pos}>
@@ -309,66 +311,28 @@ export const VRAvatarSystem = ({ currentUser, eventId, isVRMode }: VRAvatarSyste
         })}
         
         {/* Enhanced Lighting for VR */}
-        <ambientLight intensity={isVRMode ? 0.3 : 0.4} />
+        <ambientLight intensity={0.4} />
         <pointLight position={[0, 8, 0]} intensity={1.5} color="#7c3aed" castShadow />
         <pointLight position={[-8, 6, 8]} intensity={1.0} color="#00ffff" />
         <pointLight position={[8, 6, 8]} intensity={1.0} color="#ff00ff" />
         <directionalLight 
           position={[0, 15, -10]} 
-          intensity={isVRMode ? 2.0 : 1.5} 
+          intensity={2.0} 
           color="#ffffff" 
           castShadow
         />
-        
-        {/* Basic camera controls for desktop */}
-        {!isVRMode && (
-          <primitive object={camera} />
-        )}
       </>
     );
   };
 
   return (
-    <div className={`${isVRMode ? 'w-full h-screen' : 'w-full h-96'} rounded-lg overflow-hidden border border-border/30`}>
-      <Canvas 
-        camera={{ 
-          position: isVRMode ? [0, 1.6, 3] : [0, 3, 8], 
-          fov: 60 
-        }}
-        onCreated={() => {
-          console.log("Canvas created successfully");
-        }}
-        onError={(error) => {
-          console.error("Canvas error:", error);
-        }}
-      >
-        <VRSpace />
-      </Canvas>
-      
-      {!isVRMode && (
-        <div className="absolute bottom-4 left-4 bg-black/70 rounded-lg p-3 backdrop-blur-md">
-          <p className="text-white text-sm font-semibold mb-1">
-            🥽 Meta Quest 3S Ready!
-          </p>
-          <p className="text-white text-xs">
-            {avatars.length} users in this space • Click and drag to explore
-          </p>
-          <p className="text-cyan-400 text-xs mt-1">
-            ✨ Enhanced VR controllers & hand tracking
-          </p>
-        </div>
-      )}
-      
-      {isVRMode && (
-        <div className="absolute top-4 right-4 bg-black/70 rounded-lg p-3 backdrop-blur-md">
-          <p className="text-green-400 text-sm font-bold">
-            🔴 VR MODE ACTIVE
-          </p>
-          <p className="text-white text-xs">
-            Meta Quest 3S controllers detected
-          </p>
-        </div>
-      )}
-    </div>
+    <VRCanvas 
+      className={`${isVRMode ? 'w-full h-screen' : 'w-full h-96'} rounded-lg overflow-hidden border border-border/30`}
+      onVRStateChange={(vrActive) => {
+        console.log('✅ VR State changed in VRAvatarSystem:', vrActive);
+      }}
+    >
+      <VRSpace />
+    </VRCanvas>
   );
 };
