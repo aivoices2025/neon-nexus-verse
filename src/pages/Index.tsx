@@ -10,6 +10,9 @@ import { DashboardStats } from "@/components/DashboardStats";
 import { ChatPanel } from "@/components/ChatPanel";
 import { Classroom } from "@/components/Classroom";
 import { AddEventForm } from "@/components/AddEventForm";
+import { MetaverseHub } from "@/components/MetaverseHub";
+import { LearningPath } from "@/components/LearningPath";
+import { InteractiveLab } from "@/components/InteractiveLab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,10 +22,33 @@ import { Search, Video, Users, Headphones } from "lucide-react";
 const Index = () => {
   const { user, logout, isLoading } = useAuth();
   const { events, isLoading: eventsLoading, error: eventsError, refreshEvents } = useEvents();
-  const [activeView, setActiveView] = useState<"dashboard" | "events" | "profile" | "classroom">("dashboard");
+  const [activeView, setActiveView] = useState<"dashboard" | "events" | "profile" | "classroom" | "metaverse" | "learning" | "lab">("dashboard");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isVRMode, setIsVRMode] = useState(false);
+
+  // Helper functions at component level
+  const handleJoinEvent = (event: any) => {
+    console.log("🎯 JOINING EVENT:", event.title);
+    console.log("🎬 Event has 360 video:", event.has_360_video);
+    console.log("📹 Video URL:", event.video_url);
+    setSelectedEvent(event);
+  };
+
+  const toggleVRMode = () => {
+    console.log("🥽 TOGGLING VR MODE from", isVRMode, "to", !isVRMode);
+    setIsVRMode(!isVRMode);
+    if (!isVRMode) {
+      if ('xr' in navigator) {
+        console.log("🚀 Entering VR mode...");
+      }
+    }
+  };
+
+  const handleViewChange = (view: "dashboard" | "events" | "profile" | "classroom" | "metaverse" | "learning" | "lab") => {
+    console.log("📄 CHANGING VIEW from", activeView, "to", view);
+    setActiveView(view);
+  };
 
   console.log("🌟 INDEX COMPONENT RENDER START 🌟");
   console.log("👤 Auth User:", user ? `${user.email} (ID: ${user.id})` : "No user");
@@ -59,35 +85,175 @@ const Index = () => {
     );
   }
 
-  // If not authenticated, show login form
+  // If not authenticated, show login form or demo mode
   if (!user) {
     console.log("🚫 INDEX: User not authenticated, showing login form");
+    
+    // DEMO MODE - Enable this for testing without authentication
+    const DEMO_MODE = true; // Set to false to require real authentication
+    
+    if (DEMO_MODE) {
+      const demoUser = {
+        id: "demo-user-123",
+        email: "demo@learningmetaverse.com",
+        username: "Demo Explorer",
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
+      };
+      
+      // Render the main app with demo user
+      return (
+        <div className={`min-h-screen bg-background cyber-grid ${isVRMode ? 'vr-mode' : ''}`}>
+          {/* Demo Banner */}
+          <div className="fixed top-0 left-0 right-0 bg-yellow-600 text-black text-center py-2 z-50">
+            🚀 DEMO MODE - Exploring Learning Metaverse as "{demoUser.username}"
+          </div>
+          
+          {/* VR Navigation */}
+          <VRNavigation
+            currentView={activeView}
+            onViewChange={handleViewChange}
+            isVRMode={isVRMode}
+            onToggleVR={toggleVRMode}
+            user={demoUser}
+            onLogout={() => window.location.reload()}
+          />
+
+          <main className="container mx-auto px-4 py-8 pt-20">
+            {activeView === "dashboard" && (
+              <div className="space-y-8">
+                {/* Hero Section with VR Integration */}
+                <section className="text-center py-12">
+                  <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+                    Welcome to VR Learning, {demoUser.username}!
+                  </h2>
+                  <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+                    Experience immersive education in our learning metaverse. 
+                    Compatible with VR headsets and desktop browsers.
+                  </p>
+                  
+                  {/* VR Avatar System Preview */}
+                  <div className="max-w-4xl mx-auto mb-8">
+                    <VRAvatarSystem 
+                      currentUser={demoUser} 
+                      eventId="preview" 
+                      isVRMode={isVRMode}
+                    />
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {isVRMode ? "VR Mode Active - Move your head to look around" : "3D virtual space preview - Click and drag to explore"}
+                    </p>
+                  </div>
+                  
+                  <div className="flex justify-center space-x-4 flex-wrap gap-4">
+                    <Button 
+                      size="lg" 
+                      className="neon-glow bg-primary hover:bg-primary/90"
+                      onClick={() => handleViewChange("metaverse")}
+                    >
+                      <Video className="w-5 h-5 mr-2" />
+                      Enter Metaverse
+                    </Button>
+                    <Button 
+                      size="lg" 
+                      variant="outline" 
+                      className="border-cyan-400/50 hover:neon-glow"
+                      onClick={() => handleViewChange("learning")}
+                    >
+                      📚 Learning Paths
+                    </Button>
+                    <Button 
+                      size="lg" 
+                      variant="outline" 
+                      className="border-purple-400/50 hover:neon-glow"
+                      onClick={() => handleViewChange("lab")}
+                    >
+                      🧪 Interactive Lab
+                    </Button>
+                    <Button 
+                      size="lg" 
+                      variant="outline" 
+                      className="border-primary/50 hover:neon-glow"
+                      onClick={toggleVRMode}
+                    >
+                      <Headphones className="w-5 h-5 mr-2" />
+                      {isVRMode ? "Exit VR Mode" : "Enter VR Mode"}
+                    </Button>
+                  </div>
+                </section>
+
+                <DashboardStats />
+              </div>
+            )}
+
+            {activeView === "metaverse" && (
+              <MetaverseHub user={demoUser} />
+            )}
+
+            {activeView === "learning" && (
+              <LearningPath user={demoUser} />
+            )}
+
+            {activeView === "lab" && (
+              <InteractiveLab user={demoUser} />
+            )}
+
+            {activeView === "classroom" && (
+              <Classroom />
+            )}
+
+            {activeView === "events" && (
+              <div className="text-center py-12">
+                <h2 className="text-3xl font-bold mb-4">Events (Demo Mode)</h2>
+                <p className="text-muted-foreground">
+                  Events require Supabase setup. Enable full authentication to access this feature.
+                </p>
+              </div>
+            )}
+
+            {activeView === "profile" && (
+              <div className="max-w-2xl mx-auto">
+                <Card className="bg-card/50 border-border/30">
+                  <CardHeader>
+                    <CardTitle className="text-2xl bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                      Demo Profile: {demoUser.username}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="text-center">
+                      <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-cyan-500 rounded-full mx-auto mb-4"></div>
+                      <h3 className="text-xl font-semibold">{demoUser.username}</h3>
+                      <p className="text-muted-foreground">{demoUser.email}</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="p-4 bg-primary/10 rounded-lg">
+                        <div className="text-2xl font-bold text-primary">5</div>
+                        <div className="text-sm text-muted-foreground">Demo Modules</div>
+                      </div>
+                      <div className="p-4 bg-cyan-500/10 rounded-lg">
+                        <div className="text-2xl font-bold text-cyan-400">2h</div>
+                        <div className="text-sm text-muted-foreground">Demo Time</div>
+                      </div>
+                      <div className="p-4 bg-pink-500/10 rounded-lg">
+                        <div className="text-2xl font-bold text-pink-400">12</div>
+                        <div className="text-sm text-muted-foreground">Demo Friends</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </main>
+
+          {/* Chat Panel */}
+          <ChatPanel />
+        </div>
+      );
+    }
+    
     return <LoginForm />;
   }
 
   console.log("✅ INDEX: User authenticated, rendering main application");
-
-  const handleJoinEvent = (event: any) => {
-    console.log("🎯 JOINING EVENT:", event.title);
-    console.log("🎬 Event has 360 video:", event.has_360_video);
-    console.log("📹 Video URL:", event.video_url);
-    setSelectedEvent(event);
-  };
-
-  const toggleVRMode = () => {
-    console.log("🥽 TOGGLING VR MODE from", isVRMode, "to", !isVRMode);
-    setIsVRMode(!isVRMode);
-    if (!isVRMode) {
-      if ('xr' in navigator) {
-        console.log("🚀 Entering VR mode...");
-      }
-    }
-  };
-
-  const handleViewChange = (view: "dashboard" | "events" | "profile" | "classroom") => {
-    console.log("📄 CHANGING VIEW from", activeView, "to", view);
-    setActiveView(view);
-  };
 
   console.log("🎨 INDEX: About to render main UI");
 
@@ -128,14 +294,30 @@ const Index = () => {
                 </p>
               </div>
               
-              <div className="flex justify-center space-x-4">
+              <div className="flex justify-center space-x-4 flex-wrap gap-4">
                 <Button 
                   size="lg" 
                   className="neon-glow bg-primary hover:bg-primary/90"
-                  onClick={() => handleViewChange("events")}
+                  onClick={() => handleViewChange("metaverse")}
                 >
                   <Video className="w-5 h-5 mr-2" />
-                  Browse VR Events
+                  Enter Metaverse
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-cyan-400/50 hover:neon-glow"
+                  onClick={() => handleViewChange("learning")}
+                >
+                  📚 Learning Paths
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-purple-400/50 hover:neon-glow"
+                  onClick={() => handleViewChange("lab")}
+                >
+                  🧪 Interactive Lab
                 </Button>
                 <Button 
                   size="lg" 
@@ -309,6 +491,18 @@ const Index = () => {
 
         {activeView === "classroom" && (
           <Classroom />
+        )}
+
+        {activeView === "metaverse" && (
+          <MetaverseHub user={user} />
+        )}
+
+        {activeView === "learning" && (
+          <LearningPath user={user} />
+        )}
+
+        {activeView === "lab" && (
+          <InteractiveLab user={user} />
         )}
       </main>
 

@@ -2,11 +2,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { GraduationCap, Home, Video, User, LogOut, Headphones } from "lucide-react";
+import { GraduationCap, Home, Video, User, LogOut, Headphones, Globe, BookOpen, Beaker } from "lucide-react";
 
 interface VRNavigationProps {
-  currentView: "dashboard" | "events" | "profile" | "classroom";
-  onViewChange: (view: "dashboard" | "events" | "profile" | "classroom") => void;
+  currentView: "dashboard" | "events" | "profile" | "classroom" | "metaverse" | "learning" | "lab";
+  onViewChange: (view: "dashboard" | "events" | "profile" | "classroom" | "metaverse" | "learning" | "lab") => void;
   isVRMode: boolean;
   onToggleVR: () => void;
   user: any;
@@ -35,6 +35,42 @@ export const VRNavigation = ({
           </Button>
           
           <Button
+            variant={currentView === "metaverse" ? "default" : "outline"}
+            size="sm"
+            onClick={() => onViewChange("metaverse")}
+            className="border-border/30"
+          >
+            <Globe className="w-4 h-4" />
+          </Button>
+          
+          <Button
+            variant={currentView === "learning" ? "default" : "outline"}
+            size="sm"
+            onClick={() => onViewChange("learning")}
+            className="border-border/30"
+          >
+            <BookOpen className="w-4 h-4" />
+          </Button>
+          
+          <Button
+            variant={currentView === "lab" ? "default" : "outline"}
+            size="sm"
+            onClick={() => onViewChange("lab")}
+            className="border-border/30"
+          >
+            <Beaker className="w-4 h-4" />
+          </Button>
+          
+          <Button
+            variant={currentView === "classroom" ? "default" : "outline"}
+            size="sm"
+            onClick={() => onViewChange("classroom")}
+            className="border-border/30"
+          >
+            <GraduationCap className="w-4 h-4" />
+          </Button>
+          
+          <Button
             variant={currentView === "events" ? "default" : "outline"}
             size="sm"
             onClick={() => onViewChange("events")}
@@ -50,15 +86,6 @@ export const VRNavigation = ({
             className="border-border/30"
           >
             <User className="w-4 h-4" />
-          </Button>
-          
-          <Button
-            variant={currentView === "classroom" ? "default" : "outline"}
-            size="sm"
-            onClick={() => onViewChange("classroom")}
-            className="border-border/30"
-          >
-            <GraduationCap className="w-4 h-4" />
           </Button>
           
           <div className="w-px h-6 bg-border/30 mx-2"></div>

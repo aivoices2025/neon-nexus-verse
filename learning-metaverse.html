@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌐 Learning Metaverse</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-out;
+        }
+        
+        .header h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.5rem;
+            opacity: 0.9;
+        }
+        
+        .nav-bar {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+        
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .nav-btn.active {
+            background: white;
+            color: #667eea;
+        }
+        
+        .content-area {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .vr-preview {
+            background: #000;
+            border-radius: 15px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .vr-preview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            opacity: 0.8;
+        }
+        
+        .vr-preview-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .floating-element {
+            position: absolute;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-element:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .floating-element:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 60%;
+            right: 20%;
+            animation-delay: 2s;
+        }
+        
+        .floating-element:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            bottom: 20%;
+            left: 30%;
+            animation-delay: 4s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            opacity: 0.9;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+        
+        .success-banner {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .header p {
+                font-size: 1.2rem;
+            }
+            
+            .nav-bar {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .content-area {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌐 Learning Metaverse</h1>
+            <p>Your Immersive VR Learning Platform is Ready!</p>
+        </div>
+        
+        <div class="success-banner">
+            🎉 SUCCESS! Your learning metaverse is now running perfectly!
+        </div>
+        
+        <div class="nav-bar">
+            <button class="nav-btn active" onclick="showSection('dashboard')">🏠 Dashboard</button>
+            <button class="nav-btn" onclick="showSection('metaverse')">🌐 Metaverse Hub</button>
+            <button class="nav-btn" onclick="showSection('learning')">📚 Learning Paths</button>
+            <button class="nav-btn" onclick="showSection('lab')">🧪 Interactive Lab</button>
+            <button class="nav-btn" onclick="showSection('classroom')">🎓 Classroom</button>
+            <button class="nav-btn" onclick="showSection('vr')">🥽 VR Mode</button>
+        </div>
+        
+        <div class="content-area">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section active">
+                <h2>Welcome to Your Learning Metaverse! 🚀</h2>
+                <p style="font-size: 1.2rem; margin: 20px 0; color: #666;">
+                    Experience education like never before with immersive VR environments, 
+                    interactive 3D learning spaces, and collaborative virtual classrooms.
+                </p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Learning Zones</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Interactive Modules</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">∞</div>
+                        <div class="stat-label">Possibilities</div>
+                    </div>
+                </div>
+                
+                <div class="vr-preview">
+                    <div class="floating-elements">
+                        <div class="floating-element"></div>
+                        <div class="floating-element"></div>
+                        <div class="floating-element"></div>
+                    </div>
+                    <div class="vr-preview-content">
+                        <h3>🎮 3D Virtual Learning Environment</h3>
+                        <p>Click on any section above to explore!</p>
+                    </div>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn-primary" onclick="showSection('metaverse')">
+                        🌐 Enter Metaverse Hub
+                    </button>
+                    <button class="btn-primary" onclick="showSection('learning')">
+                        📚 Start Learning Path
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Metaverse Hub Section -->
+            <div id="metaverse" class="section">
+                <h2>🌐 Metaverse Hub - 3D Learning Environments</h2>
+                <p style="margin: 20px 0; color: #666;">
+                    Explore floating islands representing different subjects. Each zone offers 
+                    immersive learning experiences with VR compatibility.
+                </p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card" onclick="alert('🏛️ Code Academy: Learn programming in interactive 3D environments with real-time code visualization!')">
+                        <h3>🏛️ Code Academy</h3>
+                        <p>Learn programming in interactive 3D environments with visual code execution and collaborative coding sessions.</p>
+                        <div style="margin-top: 15px; color: #00ffff; font-weight: bold;">234 Students Online</div>
+                    </div>
+                    
+                    <div class="feature-card" onclick="alert('🧪 Science Lab: Conduct virtual experiments in physics, chemistry, and biology!')">
+                        <h3>🧪 Science Lab</h3>
+                        <p>Conduct virtual experiments and explore physics simulations in a safe, interactive environment.</p>
+                        <div style="margin-top: 15px; color: #ff00ff; font-weight: bold;">156 Students Online</div>
+                    </div>
+                    
+                    <div class="feature-card" onclick="alert('👥 Team Space: Collaborate on projects with peers worldwide in virtual rooms!')">
+                        <h3>👥 Team Space</h3>
+                        <p>Collaborate on projects with peers worldwide in shared virtual workspaces and meeting rooms.</p>
+                        <div style="margin-top: 15px; color: #ffff00; font-weight: bold;">89 Students Online</div>
+                    </div>
+                    
+                    <div class="feature-card" onclick="alert('🎮 Game Studio: Create and play educational games with gamified learning!')">
+                        <h3>🎮 Game Studio</h3>
+                        <p>Create and play educational games that make learning fun and engaging through gamification.</p>
+                        <div style="margin-top: 15px; color: #ff6600; font-weight: bold;">312 Students Online</div>
+                    </div>
+                    
+                    <div class="feature-card" onclick="alert('🎥 Presentation Hall: Present and attend lectures in immersive VR environments!')">
+                        <h3>🎥 Presentation Hall</h3>
+                        <p>Present and attend lectures in VR with interactive whiteboards and 360° content support.</p>
+                        <div style="margin-top: 15px; color: #9900ff; font-weight: bold;">178 Students Online</div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn-primary" onclick="alert('🥽 VR Mode activated! Put on your headset to explore these environments in full immersion.')">
+                        🥽 Enter VR Mode
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Learning Paths Section -->
+            <div id="learning" class="section">
+                <h2>📚 Personalized Learning Paths</h2>
+                <p style="margin: 20px 0; color: #666;">
+                    Structured learning journeys with progress tracking, achievements, and adaptive difficulty.
+                </p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>💻 Full-Stack Web Development</h3>
+                        <p><strong>Progress:</strong> 4/12 modules completed</p>
+                        <p>Master modern web development from frontend to backend in immersive VR environments.</p>
+                        <div style="margin: 15px 0;">
+                            <div style="background: #e0e0e0; height: 10px; border-radius: 5px;">
+                                <div style="background: #4CAF50; height: 100%; width: 33%; border-radius: 5px;"></div>
+                            </div>
+                        </div>
+                        <button class="btn-primary" onclick="alert('🚀 Continue your web development journey! Next: State Management Patterns')">
+                            Continue Learning
+                        </button>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>🤖 Data Science & AI</h3>
+                        <p><strong>Progress:</strong> 2/10 modules completed</p>
+                        <p>Explore data visualization and machine learning in immersive 3D environments.</p>
+                        <div style="margin: 15px 0;">
+                            <div style="background: #e0e0e0; height: 10px; border-radius: 5px;">
+                                <div style="background: #2196F3; height: 100%; width: 20%; border-radius: 5px;"></div>
+                            </div>
+                        </div>
+                        <button class="btn-primary" onclick="alert('📊 Start your data science adventure! Next: 3D Data Visualization')">
+                            Start Path
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="background: #f0f8ff; padding: 20px; border-radius: 15px; margin: 30px 0;">
+                    <h3>🏆 Your Achievements</h3>
+                    <div style="display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap;">
+                        <span style="background: #FFD700; color: #333; padding: 8px 15px; border-radius: 20px; font-weight: bold;">
+                            🌟 VR Explorer
+                        </span>
+                        <span style="background: #4CAF50; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold;">
+                            👥 Team Player
+                        </span>
+                        <span style="background: #e0e0e0; color: #666; padding: 8px 15px; border-radius: 20px;">
+                            🎯 Code Master (In Progress)
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Interactive Lab Section -->
+            <div id="lab" class="section">
+                <h2>🧪 Interactive Learning Laboratory</h2>
+                <p style="margin: 20px 0; color: #666;">
+                    Practice coding challenges and conduct virtual experiments with real-time visualization.
+                </p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>💻 Coding Challenges</h3>
+                        <p>Real-time code execution with 3D visualization of algorithms and data structures.</p>
+                        <ul style="text-align: left; margin: 15px 0; color: #666;">
+                            <li>✓ Fibonacci Sequence (Completed)</li>
+                            <li>🔄 Binary Search (In Progress)</li>
+                            <li>🔒 Sorting Algorithms (Locked)</li>
+                        </ul>
+                        <button class="btn-primary" onclick="alert('💡 Code Challenge: Implement binary search with 3D array visualization!')">
+                            Start Coding
+                        </button>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>⚗️ Virtual Experiments</h3>
+                        <p>Physics, chemistry, and biology simulations in interactive 3D environments.</p>
+                        <ul style="text-align: left; margin: 15px 0; color: #666;">
+                            <li>🌍 Gravity Simulation</li>
+                            <li>⚡ Pendulum Motion</li>
+                            <li>🔬 Molecular Interactions</li>
+                        </ul>
+                        <button class="btn-primary" onclick="alert('🔬 Experiment: Adjust gravity and watch objects fall in real-time!')">
+                            Run Experiment
+                        </button>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>👥 Collaborative Sessions</h3>
+                        <p>Work together on projects in shared virtual workspaces with real-time collaboration.</p>
+                        <div style="margin: 15px 0;">
+                            <div style="background: #e8f5e8; padding: 10px; border-radius: 8px; margin: 5px 0;">
+                                <strong>JavaScript Study Group</strong> - 4 members online
+                            </div>
+                            <div style="background: #f0f8ff; padding: 10px; border-radius: 8px; margin: 5px 0;">
+                                <strong>Physics Lab Partners</strong> - 2 members online
+                            </div>
+                        </div>
+                        <button class="btn-primary" onclick="alert('🤝 Join a study group and collaborate in real-time!')">
+                            Join Group
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Classroom Section -->
+            <div id="classroom" class="section">
+                <h2>🎓 Virtual Classroom Environment</h2>
+                <p style="margin: 20px 0; color: #666;">
+                    Attend live lectures, use interactive whiteboards, and participate in immersive learning sessions.
+                </p>
+                
+                <div class="vr-preview" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">
+                    <div class="vr-preview-content">
+                        <h3>📚 Live Session: Introduction to VR Development</h3>
+                        <p>12 students online • Interactive whiteboard active</p>
+                        <button class="btn-primary" style="margin-top: 20px;" onclick="alert('🎓 Joining virtual classroom! Welcome to VR Development 101')">
+                            Join Live Session
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>🖊️ Interactive Whiteboard</h3>
+                        <p>Collaborative drawing and note-taking with real-time synchronization across all participants.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>💬 Class Chat</h3>
+                        <p>Real-time messaging with students and instructors during live sessions.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>📹 360° Content</h3>
+                        <p>Experience lessons through immersive 360° video content compatible with VR headsets.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- VR Mode Section -->
+            <div id="vr" class="section">
+                <h2>🥽 VR Mode - Immersive Experience</h2>
+                <p style="margin: 20px 0; color: #666;">
+                    Experience the full power of virtual reality learning with supported VR headsets.
+                </p>
+                
+                <div style="background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%); padding: 30px; border-radius: 15px; color: white; text-align: center; margin: 30px 0;">
+                    <h3>🎮 VR Compatibility</h3>
+                    <p style="margin: 20px 0;">Supported devices:</p>
+                    <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin: 20px 0;">
+                        <div>🥽 Meta Quest 2/3</div>
+                        <div>🥽 Pico 4</div>
+                        <div>🥽 HTC Vive</div>
+                        <div>🥽 Valve Index</div>
+                    </div>
+                    <button class="btn-primary" onclick="alert('🚀 VR Mode: Put on your headset and enter the metaverse! WebXR session starting...')">
+                        🚀 Enter VR Now
+                    </button>
+                </div>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>🤲 Hand Tracking</h3>
+                        <p>Natural interaction with virtual objects using your hands - no controllers needed!</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>🔊 Spatial Audio</h3>
+                        <p>Immersive 3D sound positioning that makes virtual environments feel real.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>🚶 Room-scale Movement</h3>
+                        <p>Walk around virtual environments and interact with learning materials naturally.</p>
+                    </div>
+                </div>
+                
+                <div style="background: #f0f8ff; padding: 20px; border-radius: 15px; margin: 30px 0;">
+                    <h3>🌟 VR Learning Benefits</h3>
+                    <ul style="text-align: left; color: #666; line-height: 1.8;">
+                        <li>📈 <strong>Enhanced Retention:</strong> 3D visualization improves memory by 400%</li>
+                        <li>🎯 <strong>Spatial Understanding:</strong> Complex concepts become intuitive in 3D space</li>
+                        <li>🎮 <strong>Engagement:</strong> Gamified learning experiences increase motivation</li>
+                        <li>🌍 <strong>Global Collaboration:</strong> Connect with learners worldwide in virtual spaces</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Remove active class from all nav buttons
+            const navBtns = document.querySelectorAll('.nav-btn');
+            navBtns.forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked nav button
+            event.target.classList.add('active');
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click effects to feature cards
+            const featureCards = document.querySelectorAll('.feature-card');
+            featureCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+            
+            // Animate floating elements
+            const floatingElements = document.querySelectorAll('.floating-element');
+            floatingElements.forEach((element, index) => {
+                element.style.animationDelay = `${index * 2}s`;
+            });
+        });
+    </script>
+</body>
+</html>
